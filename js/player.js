@@ -13,7 +13,15 @@ const PLAYER_ATTACK_ANIM = {
   },
   mage: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'raise' } },
   archer: { light: [{ style: 'shoot' }], heavy: { style: 'shoot' }, q: { style: 'shootUp' }, e: { style: 'shoot' } },
-  necromancer: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'slam' } }
+  necromancer: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'slam' } },
+  cleric: {
+    light: [{ style: 'swing', from: 3.2, to: 0.5 }, { style: 'swing', from: 0.5, to: 3.0 }, { style: 'swing', from: 3.5, to: 0.3 }],
+    heavy: { style: 'slam' }, q: { style: 'raise' }, e: { style: 'slam' }
+  },
+  guardian: {
+    light: [{ style: 'swing', from: 3.0, to: 0.6 }, { style: 'thrust' }, { style: 'swing', from: 3.4, to: 0.3 }],
+    heavy: { style: 'bash' }, q: { style: 'guard' }, e: { style: 'bash' }
+  }
 };
 
 PL.Player = class Player extends PL.Entity {
@@ -51,6 +59,9 @@ PL.Player = class Player extends PL.Entity {
     this.slowMult = 1;
     this.slowTimer = 0;
     this.empowerTimer = 0; // Necromancer's Dark Pact: double damage for the player and summoned allies
+    this.regenTimer = 0; this.regenRate = 0; this.regenAcc = 0; // Cleric's Healing Light heal-over-time
+    this.guardTimer = 0; this.guardReduction = 0;                // Guardian's Shield Wall
+    this.chargeTimer = 0; this.chargeHit = null;                // Guardian's Shield Charge
   }
 
   applySlow(mult, duration) {
@@ -72,6 +83,17 @@ PL.Player = class Player extends PL.Entity {
     if (this.comboResetTimer > 0) { this.comboResetTimer -= dt; if (this.comboResetTimer <= 0) this.comboIndex = 0; }
     if (this.comboDisplay.timer > 0) { this.comboDisplay.timer -= dt; if (this.comboDisplay.timer <= 0) this.comboDisplay.count = 0; }
     if (this.slowTimer > 0) { this.slowTimer -= dt; if (this.slowTimer <= 0) this.slowMult = 1; }
+    if (this.regenTimer > 0) {
+      this.regenTimer -= dt;
+      const amt = Math.min(this.regenRate * dt, this.maxHp - this.hp);
+      this.hp += amt; this.regenAcc += amt;
+      if (this.regenAcc >= 4 || (this.regenTimer <= 0 && this.regenAcc >= 1)) { PL.Particles.spawnFloatText(this.x + PL.U.rand(-6, 6), this.y - this.h - 10, '+' + Math.round(this.regenAcc), '#ffe070'); this.regenAcc = 0; }
+      if (Math.random() < dt * 8) PL.Particles.spawnSpark(this.x + PL.U.rand(-7, 7), this.y - PL.U.rand(2, this.h), '#ffe070', 1, { maxLifeTime: 0.6, minSpeed: 8, maxSpeed: 24, gravity: -50 });
+    }
+    if (this.guardTimer > 0) {
+      this.guardTimer = Math.max(0, this.guardTimer - dt);
+      if (Math.random() < dt * 6) PL.Particles.spawnSpark(this.x + this.facing * 8, this.y - PL.U.rand(8, this.h - 6), '#8ab0ff', 1, { maxLifeTime: 0.35, minSpeed: 6, maxSpeed: 20 });
+    }
     if (this.empowerTimer > 0) {
       this.empowerTimer = Math.max(0, this.empowerTimer - dt);
       if (Math.random() < dt * 14) PL.Particles.spawnSpark(this.x + PL.U.rand(-6, 6), this.y - PL.U.rand(4, this.h), '#b06aff', 1, { maxLifeTime: 0.5, minSpeed: 10, maxSpeed: 30, gravity: -60 });
@@ -115,9 +137,42 @@ PL.Player = class Player extends PL.Entity {
       else if (PL.Input.actionJustPressed('heavy')) this.queuedAction = 'heavy';
     }
 
+    if (this.chargeTimer > 0) this.updateCharge(dt);
     this.updateAction(dt);
     this.updateZones(dt);
     this.applyPhysics(dt, PL.World);
+  }
+
+  // Shield Charge: a short unstoppable rush that hits each enemy once, knocks it away and stuns it.
+  updateCharge(dt) {
+    this.chargeTimer -= dt;
+    this.vx = this.facing * 620;
+    this.invulnTimer = Math.max(this.invulnTimer, 0.05);
+    if (Math.random() < 0.6) PL.Particles.spawnDust(this.x, this.y, -this.facing);
+    const c = this.chargeHit;
+    const hb = this.meleeHitbox(26);
+    for (const e of this._enemies) {
+      if (!e.alive || c.hit.has(e) || !PL.U.aabbOverlap(hb, e.rect())) continue;
+      c.hit.add(e);
+      const { dmg, isCrit } = this.computeDamage(c.mult, null);
+      const final = PL.U.mitigate(dmg, e.def || 0);
+      e.takeDamage(final, { knockback: 380, knockUp: -260, fromRight: this.facing < 0 });
+      this.totalDamageDealt += final;
+      PL.Particles.hitNumber(e.x, e.y - e.h - 6, final, isCrit);
+      PL.Particles.spawnBurst(e.x, e.y - e.h * 0.5, '#8ab0ff', 10, 160);
+      this.stunEnemy(e, c.stun);
+      PL.Audio.sfx.hitHeavy();
+      PL.World.camera.shake(6, 0.15);
+      this.registerCombo();
+    }
+    if (this.chargeTimer <= 0) { this.vx = this.facing * 120; this.chargeHit = null; }
+  }
+
+  stunEnemy(e, dur) {
+    if (!e.alive || !dur || e.isBoss) return; // bosses only feel it through their poise
+    e.hurtTimer = Math.max(e.hurtTimer || 0, dur);
+    e.action = null;
+    PL.Particles.spawnFloatText(e.x, e.y - e.h - 14, 'ОГЛУШЁН', '#ffd04a');
   }
 
   queueOrStart(type) {
@@ -227,8 +282,9 @@ PL.Player = class Player extends PL.Entity {
     return { x: cx - radius / 2, y: this.y - this.h - radius / 2, w: radius, h: radius + this.h };
   }
 
+  // Returns the total damage dealt (0 when nothing was hit).
   hitAllIn(hb, mult, slot, opts) {
-    let any = false;
+    let total = 0;
     for (const e of this._enemies) {
       if (!e.alive) continue;
       if (PL.U.aabbOverlap(hb, e.rect())) {
@@ -237,10 +293,11 @@ PL.Player = class Player extends PL.Entity {
         e.takeDamage(final, opts);
         this.totalDamageDealt += final;
         PL.Particles.hitNumber(e.x, e.y - e.h - 6, final, isCrit);
-        any = true;
+        if (opts && opts.stun) this.stunEnemy(e, opts.stun);
+        total += final;
       }
     }
-    return any;
+    return total;
   }
 
   performAttackHit(a) {
@@ -264,18 +321,19 @@ PL.Player = class Player extends PL.Entity {
       return;
     }
     const hb = this.meleeHitbox(def.range);
-    const any = this.hitAllIn(hb, mult, slot, { knockback: kb, knockUp: isLight ? -120 : -240, fromRight });
+    const any = this.hitAllIn(hb, mult, slot, { knockback: kb, knockUp: isLight ? -120 : -240, fromRight, stun: isLight ? 0 : def.stun });
+    if (any && def.lifesteal) this.heal(any * (def.lifesteal + (this.computed.lifestealBonus || 0)));
     if (any) { (isLight ? PL.Audio.sfx.hit : PL.Audio.sfx.hitHeavy)(); this.registerCombo(); }
     else (isLight ? PL.Audio.sfx.swingLight : PL.Audio.sfx.swingHeavy)();
     PL.Particles.spawnSlash(this.x + this.facing * 3, this.y - this.h * 0.62, this.facing, isLight ? '#c8d4e4' : '#ffb13b', isLight ? 20 : 25);
   }
 
-  heal(amount) {
+  heal(amount, silent) {
     if (!this.alive || amount <= 0) return;
     const before = this.hp;
     this.hp = Math.min(this.maxHp, this.hp + amount);
     const got = Math.round(this.hp - before);
-    if (got > 0) {
+    if (got > 0 && !silent) {
       PL.Particles.spawnFloatText(this.x + PL.U.rand(-6, 6), this.y - this.h - 10, '+' + got, '#6aff8a');
       PL.Particles.spawnSpark(this.x, this.y - this.h * 0.5, '#6aff8a', 5, { maxLifeTime: 0.4, minSpeed: 20, maxSpeed: 70 });
     }
@@ -309,6 +367,8 @@ PL.Player = class Player extends PL.Entity {
       case 'fireStorm': return { x: this.x + this.facing * 90, y: this.y, radius };
       case 'arrowRain': return { x: this.x + this.facing * 160, y: this.y, radius };
       case 'raiseKnight': return { x: this.x + this.facing * 30, y: this.y, radius };
+      case 'sanctuary': return { x: this.x + this.facing * 30, y: this.y, radius };
+      case 'shieldCharge': return { x: this.x + this.facing * 60, y: this.y, radius: 40 };
       default: return { x: this.x, y: this.y, radius };
     }
   }
@@ -325,8 +385,16 @@ PL.Player = class Player extends PL.Entity {
         z.timer = z.interval;
         if (z.aroundSelf) z.x = this.x;
         const hb = this.zoneHitbox(z.x, z.radius);
-        this.hitAllIn(hb, z.mult, null, { knockback: 50, knockUp: -70, fromRight: this.facing < 0 });
-        PL.Particles.spawnBurst(z.x, this.y - 30, z.color, 7, 130);
+        if (z.sanctuary) {
+          // Holy ground: burns enemies standing in the circle (no knockback) and heals the player inside it.
+          const rr = { x: z.x - z.radius / 2, y: this.y - 200, w: z.radius, h: 220 };
+          this.hitAllIn(rr, z.mult, null, { knockback: 0, fromRight: this.facing < 0 });
+          if (Math.abs(this.x - z.x) < z.radius / 2 + 4) this.heal(this.maxHp * z.heal, true);
+          for (let k = 0; k < 8; k++) PL.Particles.spawnSpark(z.x + PL.U.rand(-z.radius / 2, z.radius / 2), PL.World.groundY - 2, PL.U.choose(['#ffe070', '#fff8d8']), 1, { maxLifeTime: 0.9, minSpeed: 10, maxSpeed: 40, gravity: -90 });
+        } else {
+          this.hitAllIn(hb, z.mult, null, { knockback: 50, knockUp: -70, fromRight: this.facing < 0 });
+          PL.Particles.spawnBurst(z.x, this.y - 30, z.color, 7, 130);
+        }
         z.ticksLeft--;
       }
       return z.ticksLeft > 0;
@@ -401,6 +469,36 @@ PL.Player = class Player extends PL.Entity {
         PL.Audio.sfx.bossRoar();
         break;
       }
+      case 'healingLight': {
+        const hm = this.computed.healMult || 1;
+        this.heal(this.maxHp * def.heal * hm);
+        this.regenTimer = def.regenTime; this.regenRate = this.maxHp * def.regen * hm; this.regenAcc = 0;
+        PL.Particles.spawnExplosion(this.x, this.y - this.h * 0.5, 40, '#ffe070');
+        PL.Lighting.add(this.x, this.y - 20, 90, 0.8, true);
+        PL.Audio.sfx.pickup();
+        break;
+      }
+      case 'sanctuary': {
+        this.zones.push({ x: preview.x, radius: preview.radius, mult: dmgMultFinal, ticksLeft: def.ticks, timer: 0.05, interval: 0.5, color: '#ffd860', sanctuary: true, heal: def.heal * (this.computed.healMult || 1), t: 0 });
+        PL.Particles.spawnExplosion(preview.x, this.y - 6, preview.radius * 0.5, '#ffe070');
+        PL.World.camera.shake(5, 0.2);
+        PL.Audio.sfx.magicCast();
+        break;
+      }
+      case 'shieldWall': {
+        this.guardTimer = def.duration + (this.computed.shieldBonusTime || 0);
+        this.guardReduction = def.reduction;
+        PL.Particles.spawnBurst(this.x + this.facing * 8, this.y - this.h * 0.5, '#8ab0ff', 14, 120);
+        PL.Particles.spawnFloatText(this.x, this.y - this.h - 14, 'СТЕНА ЩИТОВ', '#8ab0ff', true);
+        PL.Audio.sfx.block();
+        break;
+      }
+      case 'shieldCharge': {
+        this.chargeTimer = (def.range || 170) / 620;
+        this.chargeHit = { hit: new Set(), mult: dmgMultFinal, stun: def.stun };
+        PL.Audio.sfx.dash();
+        break;
+      }
       case 'aimedShot': {
         const base = this.str * dmgMultFinal;
         const isCrit = PL.U.rollCrit(this.crit + 35);
@@ -416,7 +514,21 @@ PL.Player = class Player extends PL.Entity {
   }
 
   takeDamage(amount, opts) {
+    const guarding = this.guardTimer > 0 && this.alive && !this.isInvuln();
+    if (guarding) {
+      amount *= 1 - this.guardReduction;
+      opts = Object.assign({}, opts, { knockback: 0 });
+      PL.Particles.spawnSpark(this.x + this.facing * 10, this.y - this.h * 0.55, '#c8dcff', 6, { maxLifeTime: 0.25 });
+      PL.Audio.sfx.block();
+    }
     const applied = super.takeDamage(amount, opts);
+    if (applied && guarding && this.alive) {
+      // Shield Wall: no flinch, keep attacking.
+      this.totalDamageTaken += amount;
+      this.invulnTimer = Math.max(this.invulnTimer, 0.35);
+      PL.Particles.spawnFloatText(this.x, this.y - this.h - 6, 'БЛОК', '#8ab0ff');
+      return applied;
+    }
     if (applied) {
       this.totalDamageTaken += amount;
       if (this.alive) {
@@ -440,6 +552,8 @@ PL.Player = class Player extends PL.Entity {
     const st = { time: this.animTime, phase: this.runCyclePhase, hurt: this.state === 'hurt' };
     st.move = !this.onGround ? (this.vy < 0 ? 'jump' : 'fall') : this.state === 'dodge' ? 'crouch' : Math.abs(this.vx) > 5 ? 'run' : 'idle';
     const a = this.action;
+    if (!a && this.guardTimer > 0) st.attack = { style: 'guard', stage: 'active', u: 1 };
+    if (!a && this.chargeTimer > 0) st.attack = { style: 'bash', stage: 'active', u: 0.5 };
     if (a) {
       const styles = PLAYER_ATTACK_ANIM[this.classId];
       const key = a.type === 'ability' ? a.slot : a.type === 'heavy' ? 'heavy' : 'light';
@@ -474,11 +588,38 @@ PL.Player = class Player extends PL.Entity {
     const pactFlash = this.empowerTimer > 0 && Math.floor(this.animTime * 6) % 3 === 0 ? '#b06aff' : false;
     if (!blink) PL.CharSprites.draw(ctx, this.classId, cx, groundY, this.facing, pose, this.hitFlash > 0 || pactFlash);
     if (this.empowerTimer > 0) PL.Lighting.add(this.x, this.y - this.h * 0.5, 50, 0.35, false, '#b06aff');
+    if (this.guardTimer > 0) PL.Lighting.add(this.x + this.facing * 8, this.y - this.h * 0.5, 40, 0.3, false, '#8ab0ff');
     PL.Rig.drawNameTag(ctx, cx, groundY, PL.CharSprites.height(this.classId) + 3, this.classDef.name, this.classDef.palette.accent);
     this.renderTelegraph(ctx, camX, groundY);
   }
 
+  renderZones(ctx, camX) {
+    for (const z of this.zones) {
+      if (!z.sanctuary) continue;
+      const gy = PL.World.groundY, x0 = Math.round(z.x - z.radius / 2 - camX), w = Math.round(z.radius);
+      const fade = Math.min(1, z.ticksLeft / 3);
+      const pulse = 0.85 + Math.sin(this.animTime * 6) * 0.15;
+      // glowing rune band on the floor
+      ctx.globalAlpha = 0.8 * fade;
+      ctx.fillStyle = '#ffd860'; ctx.fillRect(x0, gy - 1, w, 3);
+      ctx.fillStyle = '#fff8d8'; ctx.fillRect(x0 + 3, gy - 2, w - 6, 1);
+      ctx.fillStyle = '#ffffff';
+      for (let x = x0 + 4 + Math.floor(this.animTime * 20) % 8; x < x0 + w - 3; x += 8) ctx.fillRect(x, gy, 2, 1);
+      // soft column of light rising from the circle
+      for (let h = 0; h < 70; h++) {
+        ctx.globalAlpha = 0.14 * fade * pulse * (1 - h / 70);
+        ctx.fillStyle = '#ffe070'; ctx.fillRect(x0 + 2, gy - 2 - h, w - 4, 1);
+      }
+      // bright edge pillars
+      ctx.fillStyle = '#fff4c0';
+      for (let h = 0; h < 56; h += 2) { ctx.globalAlpha = 0.7 * fade * (1 - h / 56); ctx.fillRect(x0, gy - h, 2, 1); ctx.fillRect(x0 + w - 2, gy - h, 2, 1); }
+      ctx.globalAlpha = 1;
+      PL.Lighting.add(z.x, gy - 20, z.radius * 0.9, 0.7 * fade, true, '#ffe070');
+    }
+  }
+
   renderTelegraph(ctx, camX, groundY) {
+    this.renderZones(ctx, camX);
     if (this.action && this.action.type === 'ability' && this.action.phase === 'telegraph') {
       const prev = this.action.preview;
       PL.Pixel.marker(ctx, prev.x - camX, groundY - 1, Math.max(10, prev.radius / 2), '#ff9a3a', this.action.t);

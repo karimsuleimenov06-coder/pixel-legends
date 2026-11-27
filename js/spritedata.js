@@ -167,6 +167,22 @@ window.PL = window.PL || {};
       pal: { H: '#3a2a4e', h: '#22182e', Y: '#54406e', d: '#08050c', S: '#d8d4c8', s: '#a8a498', e: '#b0ffc0', E: '#6aff8a', T: '#ece6d4', A: '#3e2a5a', a: '#24183a', L: '#5a3e82', B: '#d8d0b8', G: '#6aff8a' },
       limbs: limbs('#3e2a5a', '#d8d4c8', '#24183a', '#0e0a14')
     },
+    cleric: {
+      head: HEAD_HOOD, headOver: [{ dx: 3, dy: -3, rows: ['.GGGGG.', 'G.....G', '.GGGGG.'] }], torso: TORSO_ROBE, torsoAbove: 12, weapon: 'mace',
+      pal: Object.assign({ H: '#f0ece4', h: '#bdb5a6', Y: '#ffffff', d: '#7a7262', A: '#ece8e0', a: '#b8b0a0', L: '#ffffff', B: '#e0b040', G: '#ffd860' }, SKIN, { E: '#3a6ad0' }),
+      limbs: limbs('#ece8e0', '#e6c29a', '#b8b0a0', '#a87a3a')
+    },
+    guardian: {
+      head: HEAD_HELM, torso: TORSO_PLATE, weapon: 'sword', legScale: 1.05, legThick: 5, armThick: 4, hipSpread: 3,
+      back: { type: 'cape', color: '#2a4a9a', len: 7 }, rest: { back: 1.25 },
+      shield: {
+        rows: ['.bBBBBb.', 'bWBBBBBb', 'bWBGGBBb', 'bBGGGGBb', 'bBBGGBBb', 'bBBGGBBb', '.bBBBBb.', '.bBBBBb.', '..bBBb..', '...bb...'],
+        pal: { B: '#3a6ad0', b: '#c8ccd6', W: '#8ab0ff', G: '#e0b040' }
+      },
+      weaponPal: { W: '#eef2f6', M: '#b8c0cc', m: '#6c7482', G: '#e0b040', g: '#8a6a20' },
+      pal: { M: '#b8c0cc', m: '#7a8290', W: '#eef2f6', d: '#3a404c', R: '#3a6ad0', r: '#24448a', S: '#e0b48a', s: '#b4845a', e: '#ffffff', E: '#20182a', B: '#4a3020', b: '#e0b040' },
+      limbs: limbs('#a8b0bc', '#7c8490', '#7a8290', '#4a3020')
+    },
     death_knight: {
       head: HEAD_HELM_CLOSED, headOver: [HORNS], torso: TORSO_PLATE, weapon: 'sword', legThick: 4, armThick: 3, hipSpread: 3,
       back: { type: 'cape', color: '#1a3a26', len: 6 },

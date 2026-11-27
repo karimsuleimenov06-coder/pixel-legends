@@ -36,6 +36,11 @@ PL.UI = (function () {
     darkPact: ['....PPPP....', '..PP....PP..', '.P..P..P..P.', '.P...PP...P.', 'P..P.WW.P..P', 'P...WLLW...P', 'P...WLLW...P', 'P..P.WW.P..P', '.P...PP...P.', '.P..P..P..P.', '..PP....PP..', '....PPPP....'],
     raiseKnight: ['....MMMM....', '...MMMMMM...', '...MLMMLM...', '...MMMMMM...', '....MMMM....', '..MMMMMMMM..', '.MM.MMMM.MM.', '....MMMM....', '....M..M....', '.L.LM.LM.L..', 'LLLLLLLLLLLL', 'gggggggggggg'],
     atkSkull: ['........wwww', '.......wwwww', '.......wLwLw', '.......wwwww', '........wdw.', '.......h....', '......h.....', '.....h......', '....h.......', '...h........', '..h.........', '.h..........'],
+    healingLight: ['.....Y......', '.....Y......', '..Y..Y..Y...', '...YYWYY....', '..YYWWWYY...', 'YYYWWWWWYYY.', '..YYWWWYY...', '...YYWYY....', '..Y..Y..Y...', '.....Y......', '.....Y......', '............'],
+    sanctuary: ['............', '..Y......Y..', '..Y......Y..', '..Y..WW..Y..', '..Y.WWWW.Y..', '..Y..WW..Y..', '..Y..WW..Y..', '..Y..WW..Y..', '..Y......Y..', 'YYYYYYYYYYYY', 'GGGGGGGGGGGG', 'gggggggggggg'],
+    shieldWall: ['..MMMMMMMM..', '.MBBBBBBBBM.', '.MbBBYYBBBM.', '.MBBYYYYBBM.', '.MBBBYYBBBM.', '.MBBBYYBBBM.', '..MBBBBBBM..', '..MBBBBBBM..', '...MBBBBM...', '....MBBM....', '.....MM.....', '............'],
+    shieldCharge: ['............', '.....MMMM...', '....MBBBBM..', 'C.C.MBYYBM..', '....MBYYBM..', 'CC.CMBBBBM..', '....MBYYBM..', 'C.C.MBBBBM..', '.....MBBM...', '......MM....', '............', '............'],
+    atkMace: ['.........M..', '........MYM.', '.......MYWYM', '........MYM.', '.......h.M..', '......h.....', '.....h......', '....h.......', '...h........', '..h.........', '.Y..........', '............'],
     aimedShot: ['.....RR.....', '.....RR.....', '...RRRRRR...', '..R..RR..R..', '.R...RR...R.', 'RRRRRWWRRRRR', 'RRRRRWWRRRRR', '.R...RR...R.', '..R..RR..R..', '...RRRRRR...', '.....RR.....', '.....RR.....']
   };
   function icon(name) {
@@ -66,7 +71,7 @@ PL.UI = (function () {
       slot.title = ab.name;
       setTouchIcon(ab.key, ab.id);
     }
-    const ATTACK_ICON = { greatsword: 'atkSword', staff: 'atkStaff', dagger: 'atkDagger', bow: 'atkBow', skullStaff: 'atkSkull' };
+    const ATTACK_ICON = { greatsword: 'atkSword', staff: 'atkStaff', dagger: 'atkDagger', bow: 'atkBow', skullStaff: 'atkSkull', mace: 'atkMace' };
     setTouchIcon('light', ATTACK_ICON[PL.CLASSES[classId].weaponKind] || 'atkSword');
     setTouchIcon('heavy', 'heavy');
     setTouchIcon('jump', 'jump');

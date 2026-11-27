@@ -45,6 +45,11 @@ PL.CharSprites = (function () {
         '..H..', '..h..', '..H..', '..h..', '..H..', '..h..', '..H..', '..h..', '..g..'],
       px: 2, py: 14
     },
+    mace: {
+      pal: { M: '#e8d070', W: '#fff4c0', m: '#a88a30', S: '#d0d4dc', H: '#8a5a30', h: '#5a3a1e', G: '#e0b040' },
+      rows: ['..S..', '.mMm.', 'SMWMS', 'mMMMm', '.mMm.', '..S..', '..h..', '..H..', '..h..', '..H..', '..h..', '..H..', '..G..', '..h..'],
+      px: 2, py: 11
+    },
     skullStaff: {
       pal: { T: '#ece6d4', t: '#a89e88', E: '#6aff8a', d: '#1a1420', H: '#4a3a4a', h: '#2e2232', g: '#8a7aa0' },
       rows: ['.tTTt.', 'tTTTTt', 'TEdTEd', 'tTTTTt', '.tdTd.', '..gg..', '..hH..', '..Hh..', '..hH..', '..Hh..', '..hH..',
@@ -80,7 +85,7 @@ PL.CharSprites = (function () {
   // Resting pose (arm + weapon angle) per weapon; 0 = arm down, PI/2 = forward, PI = up.
   const REST = {
     greatsword: { front: 0.45, weapon: 2.4 }, sword: { front: 0.45, weapon: 2.3 }, axe: { front: 0.45, weapon: 2.2 },
-    greataxe: { front: 0.45, weapon: 2.3 }, dagger: { front: 0.5, weapon: 1.3 }, staff: { front: 0.5, weapon: 3.1 }, skullStaff: { front: 0.5, weapon: 3.1 },
+    greataxe: { front: 0.45, weapon: 2.3 }, dagger: { front: 0.5, weapon: 1.3 }, staff: { front: 0.5, weapon: 3.1 }, skullStaff: { front: 0.5, weapon: 3.1 }, mace: { front: 0.45, weapon: 2.3 },
     bow: { front: 0.55, weapon: 1.0 }, none: { front: 0.3, weapon: null }
   };
 
@@ -181,6 +186,14 @@ PL.CharSprites = (function () {
     out.stamp(body, 0, 0);
 
     const fr = mk(F, F);
+    if (s.shield) {
+      // Held shield: drawn in front of the body, centred on the back arm's hand.
+      const sh0 = s.shield, hx = Math.round(backSh + Math.sin(bang) * bl), hy = Math.round(shY + Math.cos(bang) * bl);
+      const sb = mk(sh0.rows[0].length, sh0.rows.length);
+      sb.grid(sh0.rows, sh0.pal, 0, 0);
+      sb.volume(0.2, 0.2).outline();
+      fr.stamp(sb, hx - (sb.w >> 1) + 1, hy - (sb.h >> 1));
+    }
     const fang = qa(p.fi);
     if (s.weapon && p.wi != null) {
       const rw = rotatedWeapon(s, p.weaponName || s.weapon, p.wi);
@@ -488,6 +501,15 @@ PL.CharSprites = (function () {
           f = PL.U.lerp(R.front, 3.0, ease); w = 3.1; p.back = PL.U.lerp(0.15, 2.9, ease);
           if (ground && a.stage === 'active') p.legs = 'crouch';
           break;
+        case 'guard':
+          f = 0.7; w = 2.0; p.back = 1.5; p.backLen = 6;
+          if (ground && st.move !== 'run') p.legs = 'crouch';
+          break;
+        case 'bash':
+          if (a.stage === 'windup') { f = 0.4; w = 2.6; p.back = 0.9; p.backLen = 5; if (ground) p.legs = 'crouch'; }
+          else if (a.stage === 'active') { f = 0.5; w = 2.5; p.back = 1.57; p.backLen = 9; if (ground) p.legs = 'run0'; }
+          else { f = 0.5; w = 2.4; p.back = 1.3; }
+          break;
         case 'punch':
           if (a.stage === 'windup') { f = -0.7; p.back = 1.0; if (ground) p.legs = 'crouch'; }
           else if (a.stage === 'active') { f = 1.57; p.back = -0.5; if (ground) p.legs = 'run0'; }
@@ -499,6 +521,8 @@ PL.CharSprites = (function () {
       }
       p.front = f;
       if (hasW) p.weapon = w;
+      // Shield bearers keep the shield up through ordinary swings.
+      if (s.shield && (a.style === 'swing' || a.style === 'thrust')) p.back = Math.max(p.back, 1.1);
     }
     if (s.backWeapon) p.backWeapon = a ? p.back + 0.6 : 1.3 + p.back * 0.2;
     return p;

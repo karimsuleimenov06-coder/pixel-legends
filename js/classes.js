@@ -110,7 +110,51 @@ PL.CLASSES = {
       { id: 'n5', name: 'Верный страж', desc: 'Рыцарь: +30% здоровья и урона', cost: 1, requires: ['n4'], effect: { allyPower: 0.3 } },
       { id: 'n6', name: 'Легион', desc: 'Призыв рыцаря поднимает двух рыцарей', cost: 1, requires: ['n3', 'n5'], effect: { allyCount: 1 } }
     ]
+  },
+
+  cleric: {
+    id: 'cleric', name: 'Целитель', weaponKind: 'mace',
+    desc: 'Святая булава, мощное лечение и освящённая земля, что жжёт врагов.',
+    palette: { skin: '#e6c29a', outfit: '#ece8e0', outfitDark: '#b8b0a0', accent: '#ffd860', hair: '#f0ece4', weapon: '#e8d070' },
+    base: { hp: 105, str: 14, def: 8, spd: 145, crit: 6, energyMax: 120, energyRegen: 15 },
+    growth: { hp: 8, str: 1.3, def: 0.8, spd: 0.4, crit: 0.15 },
+    light: { hits: 3, dmgMult: [1.0, 1.0, 1.35], range: 32, knockback: [50, 50, 120], startup: [0.1, 0.1, 0.13], active: 0.09, recovery: [0.17, 0.17, 0.3] },
+    heavy: { dmgMult: 2.0, range: 42, knockback: 200, startup: 0.28, active: 0.12, recovery: 0.38, lifesteal: 0.25 },
+    abilities: [
+      { key: 'q', id: 'healingLight', name: 'Исцеляющий свет', cooldown: 12, energyCost: 35, heal: 0.25, regen: 0.04, regenTime: 4, telegraph: 0.15, desc: 'Сразу лечит 25% здоровья и ещё 4% в секунду в течение 4 секунд.' },
+      { key: 'e', id: 'sanctuary', name: 'Святая земля', cooldown: 22, energyCost: 50, dmgMult: 0.35, ticks: 12, radius: 110, heal: 0.03, telegraph: 0.3, desc: 'Ульта: освящает землю на 6 секунд. Внутри круга ты лечишься, а враги горят.' }
+    ],
+    skillTree: [
+      { id: 'c1', name: 'Благословение', desc: '+15% урон обычных атак', cost: 1, requires: [], effect: { lightDmg: 0.15 } },
+      { id: 'c2', name: 'Святая стойкость', desc: '+15% максимального здоровья', cost: 1, requires: [], effect: { maxHp: 0.15 } },
+      { id: 'c3', name: 'Щедрый свет', desc: 'Исцеляющий свет: +40% лечения', cost: 1, requires: ['c2'], effect: { healPower: 0.4 } },
+      { id: 'c4', name: 'Освящение', desc: 'Святая земля: +30% радиуса и урона', cost: 1, requires: ['c1'], effect: { abilityRadiusE: 0.3, abilityDmgE: 0.3 } },
+      { id: 'c5', name: 'Поток веры', desc: '+25% регенерации энергии', cost: 1, requires: ['c3'], effect: { energyRegen: 0.25 } },
+      { id: 'c6', name: 'Ангел-хранитель', desc: 'Святая земля: -30% перезарядки', cost: 1, requires: ['c4', 'c5'], effect: { abilityCdE: -0.3 } }
+    ]
+  },
+
+  guardian: {
+    id: 'guardian', name: 'Щитоносец', weaponKind: 'sword',
+    desc: 'Живая крепость: блокирует удары щитом и сбивает врагов тараном.',
+    palette: { skin: '#e0b48a', outfit: '#b8c0cc', outfitDark: '#7a8290', accent: '#6a9aff', hair: '#3a2a1a', weapon: '#eef2f6' },
+    base: { hp: 150, str: 13, def: 15, spd: 135, crit: 4, energyMax: 85, energyRegen: 10 },
+    growth: { hp: 12, str: 1.2, def: 1.2, spd: 0.4, crit: 0.1 },
+    light: { hits: 3, dmgMult: [0.9, 0.95, 1.3], range: 32, knockback: [50, 50, 130], startup: [0.09, 0.09, 0.12], active: 0.09, recovery: [0.16, 0.16, 0.3] },
+    heavy: { dmgMult: 1.6, range: 38, knockback: 300, startup: 0.2, active: 0.12, recovery: 0.34, stun: 0.9 },
+    abilities: [
+      { key: 'q', id: 'shieldWall', name: 'Стена щитов', cooldown: 12, energyCost: 30, duration: 4, reduction: 0.7, telegraph: 0.08, desc: 'На 4 секунды: -70% получаемого урона, удары не сбивают и не отбрасывают.' },
+      { key: 'e', id: 'shieldCharge', name: 'Таран', cooldown: 14, energyCost: 40, dmgMult: 2.2, range: 170, stun: 1.5, telegraph: 0.2, desc: 'Ульта: рывок со щитом сквозь врагов — урон, отбрасывание и оглушение на 1,5 с.' }
+    ],
+    skillTree: [
+      { id: 'g1', name: 'Закалённый клинок', desc: '+15% урон обычных атак', cost: 1, requires: [], effect: { lightDmg: 0.15 } },
+      { id: 'g2', name: 'Тяжёлые латы', desc: '+15% максимального здоровья', cost: 1, requires: [], effect: { maxHp: 0.15 } },
+      { id: 'g3', name: 'Крепкий щит', desc: 'Стена щитов: +1,5 с длительности', cost: 1, requires: ['g2'], effect: { shieldTime: 1.5 } },
+      { id: 'g4', name: 'Сокрушающий таран', desc: 'Таран: +30% урона', cost: 1, requires: ['g1'], effect: { abilityDmgE: 0.3 } },
+      { id: 'g5', name: 'Бастион', desc: '+20% защиты', cost: 1, requires: ['g3'], effect: { defense: 0.2 } },
+      { id: 'g6', name: 'Несокрушимый', desc: 'Таран: -30% перезарядки', cost: 1, requires: ['g4', 'g5'], effect: { abilityCdE: -0.3 } }
+    ]
   }
 };
 
-PL.CLASS_LIST = ['warrior', 'mage', 'assassin', 'archer', 'necromancer'];
+PL.CLASS_LIST = ['warrior', 'mage', 'assassin', 'archer', 'necromancer', 'cleric', 'guardian'];

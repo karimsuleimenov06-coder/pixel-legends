@@ -32,7 +32,7 @@ PL.Progression = {
     const agg = {
       lightDmg: 0, heavyDmg: 0, maxHp: 0, crit: 0, moveSpeed: 0, energyMax: 0, energyRegen: 0,
       abilityCdQ: 0, abilityCdE: 0, abilityDmgQ: 0, abilityDmgE: 0, abilityRadiusQ: 0, abilityRadiusE: 0,
-      lifesteal: 0, allyPower: 0, allyCount: 0
+      lifesteal: 0, allyPower: 0, allyCount: 0, healPower: 0, shieldTime: 0, defense: 0
     };
     for (const nodeId of profile.skills) {
       const node = cls.skillTree.find(n => n.id === nodeId);
@@ -74,6 +74,7 @@ PL.Progression = {
     let energyRegen = base.energyRegen;
 
     maxHp *= (1 + agg.maxHp);
+    def *= (1 + agg.defense);
     spd *= (1 + agg.moveSpeed);
     crit += agg.crit * 100;
     energyMax *= (1 + agg.energyMax);
@@ -84,6 +85,7 @@ PL.Progression = {
       energyMax: Math.round(energyMax), energyRegen,
       lightDmgMult: 1 + agg.lightDmg, heavyDmgMult: 1 + agg.heavyDmg,
       lifestealBonus: agg.lifesteal, allyPower: 1 + agg.allyPower, allyCount: 1 + agg.allyCount,
+      healMult: 1 + agg.healPower, shieldBonusTime: agg.shieldTime,
       abilityMods: {
         q: { cdMult: Math.max(0.35, 1 + agg.abilityCdQ), dmgMult: 1 + agg.abilityDmgQ, radiusMult: 1 + agg.abilityRadiusQ },
         e: { cdMult: Math.max(0.35, 1 + agg.abilityCdE), dmgMult: 1 + agg.abilityDmgE, radiusMult: 1 + agg.abilityRadiusE }
