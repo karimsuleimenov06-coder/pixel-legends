@@ -94,6 +94,7 @@ PL.Enemy = class Enemy extends PL.Entity {
     this.isElite = !!def.elite;
     this.isBoss = false;
     this._enemiesList = [];
+    this.summonTimer = PL.U.rand(3, 5);
   }
 
   takeDamage(amount, opts) {
@@ -120,6 +121,7 @@ PL.Enemy = class Enemy extends PL.Entity {
     const id = this.cfg.id;
     const pix = PL.CharSprites.pixels(id, PL.CharSprites.poseFor(id, this.animState()), this.facing, this.isBoss ? 700 : 260);
     PL.Particles.shatter(this.x, this.y, pix, opts && opts.fromRight ? -1 : 1, this.isBoss);
+    if (this.cfg.special === 'lavaDeath') PL.Hazards.spawnTelegraphed(this.x, 34, 0.45, this.dmg * 0.6, 2.2, '#ff5a1a');
     PL.Particles.spawnBurst(this.x, this.y - this.h * 0.5, '#fff8dc', this.isBoss ? 30 : 12, this.isBoss ? 320 : 200);
     if (this.isBoss) {
       PL.Particles.spawnExplosion(this.x, this.y - this.h * 0.5, 120, '#ffb13b');
@@ -143,6 +145,22 @@ PL.Enemy = class Enemy extends PL.Entity {
         this.shielding = !this.shielding;
         this.shieldTimer = this.shielding ? 1.1 : PL.U.rand(3, 5);
         if (this.shielding) PL.Particles.spawnBurst(this.x, this.y - this.h * 0.6, '#8ab4ff', 10, 90);
+      }
+    } else if (sp === 'summon') {
+      this.summonTimer -= dt;
+      if (this.summonTimer <= 0 && !this.action) {
+        this.summonTimer = PL.U.rand(6, 8);
+        const list = this._enemiesList || [];
+        const alive = list.filter(e => e.alive && e.summoned).length;
+        const zdef = PL.ENEMY_DEFS.find(d => d.id === 'zombie');
+        for (let i = 0; i < Math.min(2, 3 - alive); i++) {
+          const ex = PL.U.clamp(this.x + (i ? 1 : -1) * PL.U.rand(40, 70), 30, PL.World.width - 30);
+          const z = PL.createEnemy(zdef, ex);
+          z.summoned = true; z.xp = Math.round(z.xp * 0.3);
+          list.push(z);
+          PL.Particles.spawnBurst(ex, PL.World.groundY - 8, '#6aff8a', 14, 120);
+        }
+        if (alive < 3) { PL.Audio.sfx.magicCast(); PL.Particles.spawnBurst(this.x, this.y - this.h * 0.7, '#6aff8a', 10, 90); }
       }
     } else if (sp === 'teleport') {
       this.teleTimer -= dt;
@@ -244,6 +262,10 @@ PL.Enemy = class Enemy extends PL.Entity {
       player.takeDamage(final, { knockback: 180, knockUp: -200, fromRight: this.facing < 0 });
       PL.Particles.hitNumber(player.x, player.y - player.h - 6, final, isCrit);
       PL.Particles.spawnSlash(this.x + this.facing * 3, this.y - this.h * 0.62, this.facing, '#ff6b6b', Math.max(14, Math.round(this.h * 0.55)));
+      if (this.cfg.special === 'frostSlow' && player.applySlow) {
+        player.applySlow(0.6, 1.6);
+        PL.Particles.spawnBurst(player.x, player.y - player.h * 0.5, '#8dd9ff', 8, 80);
+      }
       PL.Audio.sfx.hit();
       return true;
     }
@@ -297,13 +319,13 @@ PL.Enemy = class Enemy extends PL.Entity {
   render(ctx, camX) {
     const id = this.cfg.id;
     const cx = this.x - camX;
-    const hover = this.cfg.wings ? -6 + Math.round(Math.sin(this.animTime * 6) * 2) : 0;
+    const hover = this.cfg.hover ? -this.cfg.hover + Math.round(Math.sin(this.animTime * 6) * 2) : 0;
     const groundY = this.y + hover;
     if (!this.alive) return;
     PL.CharSprites.drawShadow(ctx, cx, this.y, this.w + 6);
     PL.CharSprites.draw(ctx, id, cx, groundY, this.facing, PL.CharSprites.poseFor(id, this.animState()), this.flashColor());
     const glow = PL.SPRITE_SPECS[id].glow;
-    if (glow) PL.Lighting.add(this.x, this.y - this.h * 0.5, glow.r, glow.i, true);
+    if (glow) PL.Lighting.add(this.x, groundY - this.h * 0.5, glow.r, glow.i, true, glow.color);
 
     if (this.isElite || this.isBoss) {
       PL.Rig.drawNameTag(ctx, cx, groundY, this.h + 3, this.name, this.isBoss ? '#ff8a3b' : '#d04fff');

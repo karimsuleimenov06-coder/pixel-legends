@@ -11,7 +11,16 @@ PL.ENEMY_DEFS = [
   { id: 'dark_acolyte', name: 'Тёмный послушник', hp: 40, dmg: 9, def: 2, spd: 92, xp: 15, behavior: 'ranged', range: 220, atkCd: 1.9, projColor: '#a94fff' },
   { id: 'goblin_archer', name: 'Гоблин-стрелок', hp: 34, dmg: 8, def: 1, spd: 98, xp: 14, behavior: 'ranged', range: 240, atkCd: 1.6, projColor: '#c7a22a' },
   { id: 'skeleton_mage', name: 'Скелет-маг', hp: 44, dmg: 10, def: 3, spd: 88, xp: 18, behavior: 'ranged', range: 230, atkCd: 2.0, projColor: '#6ad9ff', teleports: true },
-  { id: 'harpy', name: 'Гарпия', hp: 46, dmg: 10, def: 2, spd: 135, xp: 17, behavior: 'flyer', range: 38, atkCd: 1.8, wings: true, flies: true }
+  { id: 'harpy', name: 'Гарпия', hp: 46, dmg: 10, def: 2, spd: 135, xp: 17, behavior: 'flyer', range: 38, atkCd: 1.8, hover: 6, flies: true },
+  { id: 'zombie', name: 'Зомби', hp: 60, dmg: 11, def: 3, spd: 62, xp: 14, behavior: 'rush', range: 28, atkCd: 1.4 },
+  { id: 'mummy', name: 'Мумия', hp: 85, dmg: 13, def: 5, spd: 58, xp: 20, behavior: 'rush', range: 30, atkCd: 1.6 },
+  { id: 'dark_imp', name: 'Бесёнок', hp: 34, dmg: 10, def: 1, spd: 120, xp: 17, behavior: 'ranged', range: 210, atkCd: 1.7, projColor: '#ff7a1a', hover: 10, flies: true },
+  { id: 'mushroom_man', name: 'Грибник', hp: 48, dmg: 9, def: 3, spd: 80, xp: 13, behavior: 'rush', range: 24, atkCd: 1.2 },
+  { id: 'ice_slime', name: 'Ледяной слизень', hp: 40, dmg: 8, def: 2, spd: 64, xp: 13, behavior: 'rush', range: 26, atkCd: 1.0, special: 'frostSlow' },
+  { id: 'lava_slime', name: 'Лавовый слизень', hp: 50, dmg: 12, def: 3, spd: 60, xp: 18, behavior: 'rush', range: 26, atkCd: 1.1, special: 'lavaDeath' },
+  { id: 'cave_bat', name: 'Пещерная мышь', hp: 22, dmg: 7, def: 0, spd: 170, xp: 11, behavior: 'flyer', range: 30, atkCd: 1.3, hover: 16, flies: true },
+  { id: 'demon_eye', name: 'Демонический глаз', hp: 38, dmg: 10, def: 2, spd: 120, xp: 16, behavior: 'flyer', range: 34, atkCd: 1.6, hover: 18, flies: true },
+  { id: 'skeleton_archer', name: 'Скелет-лучник', hp: 44, dmg: 10, def: 3, spd: 88, xp: 17, behavior: 'ranged', range: 250, atkCd: 1.8, projColor: '#e8e2d0' }
 ];
 
 PL.ELITE_DEFS = [
@@ -19,7 +28,9 @@ PL.ELITE_DEFS = [
   { id: 'elite_dark_knight', name: 'Тёмный Рыцарь', hp: 280, dmg: 19, def: 12, spd: 78, xp: 80, behavior: 'rush', range: 42, atkCd: 1.7, elite: true, special: 'shield' },
   { id: 'elite_shadow_assassin', name: 'Теневой Убийца', hp: 160, dmg: 18, def: 5, spd: 175, xp: 75, behavior: 'dash', range: 40, atkCd: 1.3, elite: true, special: 'teleport' },
   { id: 'elite_flame_shaman', name: 'Огненный Шаман', hp: 190, dmg: 15, def: 4, spd: 90, xp: 85, behavior: 'ranged', range: 230, atkCd: 2.1, projColor: '#ff5a1a', elite: true, special: 'firePools' },
-  { id: 'elite_frost_archer', name: 'Ледяной Лучник', hp: 180, dmg: 16, def: 5, spd: 96, xp: 80, behavior: 'ranged', range: 250, atkCd: 1.8, projColor: '#8dd9ff', elite: true, special: 'frostSlow' }
+  { id: 'elite_frost_archer', name: 'Ледяной Лучник', hp: 180, dmg: 16, def: 5, spd: 96, xp: 80, behavior: 'ranged', range: 250, atkCd: 1.8, projColor: '#8dd9ff', elite: true, special: 'frostSlow' },
+  { id: 'elite_necromancer', name: 'Некромант', hp: 190, dmg: 15, def: 5, spd: 85, xp: 90, behavior: 'ranged', range: 220, atkCd: 2.0, projColor: '#6aff8a', elite: true, special: 'summon' },
+  { id: 'elite_pharaoh', name: 'Проклятый Фараон', hp: 300, dmg: 20, def: 10, spd: 70, xp: 95, behavior: 'rush', range: 40, atkCd: 1.6, elite: true, special: 'enrage' }
 ];
 
 PL.BOSS_DEFS = [

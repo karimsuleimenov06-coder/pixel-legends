@@ -20,56 +20,56 @@ const THEMES = {
   arena: {
     wall: ['brick', T.hallWall], wainscot: ['vplanks', T.hallWood], floorTop: ['planks', T.floorPlank], floor: ['brick', T.redBrick],
     ceiling: ['planks', T.ceilWood], side: ['bigBrick', T.greyStone], sky: SKY_SNOW, snow: true, ambient: 0.66, tint: [1.0, 0.95, 1.1],
-    banners: ['#a83a3a', '#3a5aa8'], emblems: ['sword', 'crown'], modules: ['window', 'frames', 'shelf', 'banner', 'trophy', 'window']
+    banners: ['#a83a3a', '#3a5aa8'], emblems: ['sword', 'crown'], modules: ['window', 'frames', 'forge', 'shelf', 'banner', 'trophy', 'storage', 'window'], clutter: ['pot', 'crate', 'gold', 'pot']
   },
   crypt: {
     wall: ['brick', { base: '#3e3848', light: '#4a4456', dark: '#34303e', mortar: '#1c1922' }], wainscot: null,
     floorTop: ['bigBrick', { base: '#6a6674', light: '#7a7684', dark: '#5a5664', mortar: '#2a2830' }],
     floor: ['bigBrick', { base: '#4a4654', light: '#56525e', dark: '#3e3a48', mortar: '#1e1c24' }],
     ceiling: ['dirt', { base: '#26222e', light: '#2e2a36', dark: '#1c1922', pebble: '#36323e' }], side: ['bigBrick', T.greyStone],
-    sky: null, ambient: 0.4, tint: [0.85, 0.9, 1.25], fx: 'wisps', fxColor: '#8ad0ff', banners: ['#5a2a7a', '#3a3a4a'], emblems: ['skull'], modules: ['trophy', 'shelf', 'banner', 'trophy']
+    sky: null, ambient: 0.4, tint: [0.85, 0.9, 1.25], fx: 'wisps', fxColor: '#8ad0ff', banners: ['#5a2a7a', '#3a3a4a'], emblems: ['skull'], modules: ['trophy', 'storage', 'shelf', 'banner', 'trophy'], clutter: ['bones', 'pot', 'mushGlow', 'bones'], webs: 0.8
   },
   volcanic: {
     wall: ['dirt', { base: '#3a2420', light: '#4a2e28', dark: '#2c1a16', pebble: '#5a3a30' }], wainscot: null,
     floorTop: ['bigBrick', { base: '#3a3042', light: '#4a3e54', dark: '#2a2230', mortar: '#120e16' }],
     floor: ['dirt', { base: '#2a1a16', light: '#3a2218', dark: '#1e120e', pebble: '#ff6a1a' }],
     ceiling: ['dirt', { base: '#241612', light: '#2e1c16', dark: '#1a0e0a', pebble: '#3a2420' }], side: ['bigBrick', { base: '#3a2a2a', light: '#4a3434', dark: '#2e2020', mortar: '#140c0c' }],
-    sky: null, ambient: 0.36, tint: [1.25, 0.8, 0.7], fx: 'embers', fxColor: '#ff8a2a', banners: ['#a8401a'], emblems: ['star'], modules: ['crystalOrange', 'banner', 'trophy', 'crystalOrange']
+    sky: null, ambient: 0.36, tint: [1.25, 0.8, 0.7], fx: 'embers', fxColor: '#ff8a2a', banners: ['#a8401a'], emblems: ['star'], modules: ['crystalOrange', 'forge', 'banner', 'trophy', 'crystalOrange'], clutter: ['bones', 'pot', 'gold']
   },
   voidrealm: {
     wall: ['brick', { base: '#2a1a3e', light: '#36224e', dark: '#221432', mortar: '#120a1e' }], wainscot: null,
     floorTop: ['bigBrick', { base: '#4a2e6a', light: '#5a387e', dark: '#3e2658', mortar: '#1a0e2a' }],
     floor: ['bigBrick', { base: '#2e1c44', light: '#382252', dark: '#261638', mortar: '#120a1e' }],
     ceiling: ['dirt', { base: '#1a0e28', light: '#221232', dark: '#12081e', pebble: '#3a1e5a' }], side: ['bigBrick', { base: '#3a2a4e', light: '#46345e', dark: '#2e2040', mortar: '#160e22' }],
-    sky: null, ambient: 0.32, tint: [1.0, 0.75, 1.35], fx: 'sparks', fxColor: '#d04aff', banners: ['#7a2aa8'], emblems: ['star'], modules: ['crystal', 'banner', 'crystal', 'trophy']
+    sky: null, ambient: 0.32, tint: [1.0, 0.75, 1.35], fx: 'sparks', fxColor: '#d04aff', banners: ['#7a2aa8'], emblems: ['star'], modules: ['crystal', 'banner', 'storage', 'crystal', 'trophy'], clutter: ['mushGlow', 'bones', 'pot'], webs: 0.4
   },
   skyruins: {
     wall: ['bigBrick', { base: '#9aa4b4', light: '#aeb8c6', dark: '#8892a2', mortar: '#5a6272' }], wainscot: null,
     floorTop: ['grassTop', { base: '#6a5a4a', light: '#7a6a58', dark: '#5a4a3c', pebble: '#8a7a68', grass: '#e8f0f6', grassLight: '#ffffff', grassDark: '#b8c8d8' }],
     floor: ['dirt', { base: '#6a5a4a', light: '#7a6a58', dark: '#5a4a3c', pebble: '#8a7a68' }],
     ceiling: ['bigBrick', { base: '#7a8494', light: '#8a94a4', dark: '#6c7686', mortar: '#4a5262' }], side: ['bigBrick', T.greyStone],
-    sky: SKY_SNOW, snow: true, ambient: 0.82, tint: [0.95, 1.0, 1.12], banners: ['#3a6ab8', '#e8e8f0'], emblems: ['star', 'sword'], modules: ['window', 'banner', 'window', 'trophy']
+    sky: SKY_SNOW, snow: true, ambient: 0.82, tint: [0.95, 1.0, 1.12], banners: ['#3a6ab8', '#e8e8f0'], emblems: ['star', 'sword'], modules: ['window', 'banner', 'forge', 'window', 'trophy'], clutter: ['crate', 'pot', 'gold']
   },
   cathedral: {
     wall: ['bigBrick', { base: '#5a5668', light: '#6a6678', dark: '#4e4a5c', mortar: '#2a2834' }], wainscot: ['vplanks', { base: '#4a3428', gap: '#2a1c14' }],
     floorTop: ['brick', { base: '#8a8698', light: '#9a96a8', dark: '#7a768a', mortar: '#4a4658' }],
     floor: ['brick', { base: '#6a6678', light: '#7a7688', dark: '#5e5a6c', mortar: '#3a3646' }],
     ceiling: ['planks', T.ceilWood], side: ['bigBrick', T.greyStone],
-    sky: SKY_STAINED, windowLight: '#c898ff', ambient: 0.5, tint: [1.0, 0.92, 1.2], banners: ['#6a2a8a', '#a8902a'], emblems: ['crown', 'star'], modules: ['window', 'trophy', 'window', 'shelf']
+    sky: SKY_STAINED, windowLight: '#c898ff', ambient: 0.5, tint: [1.0, 0.92, 1.2], banners: ['#6a2a8a', '#a8902a'], emblems: ['crown', 'star'], modules: ['window', 'trophy', 'storage', 'window', 'shelf'], clutter: ['pot', 'gold', 'crate'], webs: 0.35
   },
   forest: {
     wall: ['vplanks', { base: '#7a5432', gap: '#4a3018' }], wainscot: null,
     floorTop: ['grassTop', { base: '#6a4a2e', light: '#7a583a', dark: '#5a3c24', pebble: '#8a7a68', grass: '#4eaa44', grassLight: '#7ad06a', grassDark: '#2e7a2e' }],
     floor: ['dirt', { base: '#6a4a2e', light: '#7a583a', dark: '#5a3c24', pebble: '#8a7a68' }],
     ceiling: ['planks', T.ceilWood], side: ['dirt', { base: '#5a3c24', light: '#6a4a2e', dark: '#4a301c', pebble: '#7a6a58' }],
-    sky: SKY_FOREST, ambient: 0.7, tint: [0.95, 1.08, 0.92], fx: 'spores', fxColor: '#cfe8a0', banners: ['#3a8a3a'], emblems: ['star'], modules: ['window', 'shelf', 'frames', 'window']
+    sky: SKY_FOREST, ambient: 0.7, tint: [0.95, 1.08, 0.92], fx: 'spores', fxColor: '#cfe8a0', banners: ['#3a8a3a'], emblems: ['star'], modules: ['window', 'shelf', 'storage', 'frames', 'window'], clutter: ['mush', 'pot', 'crate', 'mush']
   },
   survival: {
     wall: ['dirt', { base: '#3a3230', light: '#463c3a', dark: '#2e2826', pebble: '#5a4e4a' }], wainscot: null,
     floorTop: ['bigBrick', { base: '#5a524e', light: '#6a605c', dark: '#4e4642', mortar: '#2a2422' }],
     floor: ['dirt', { base: '#2e2624', light: '#3a302e', dark: '#241e1c', pebble: '#4a403c' }],
     ceiling: ['dirt', { base: '#221c1a', light: '#2a2220', dark: '#1a1412', pebble: '#3a3230' }], side: ['bigBrick', T.greyStone],
-    sky: SKY_DUSK, ambient: 0.44, tint: [1.05, 0.9, 1.05], fx: 'ash', fxColor: '#9a8e94', banners: ['#8a2a2a'], emblems: ['skull'], modules: ['frames', 'banner', 'window', 'trophy']
+    sky: SKY_DUSK, ambient: 0.44, tint: [1.05, 0.9, 1.05], fx: 'ash', fxColor: '#9a8e94', banners: ['#8a2a2a'], emblems: ['skull'], modules: ['frames', 'forge', 'banner', 'window', 'trophy'], clutter: ['bones', 'crate', 'pot'], webs: 0.5
   }
 };
 
@@ -152,6 +152,7 @@ PL.World = {
       const cx = (pillars[i] + pillars[i + 1]) / 2;
       this._placeModule(g, th.modules[i % th.modules.length], cx, gy, beamY, ox, oy, th, rnd);
       this._placeUpper(g, UPPER[(i + this.theme.length) % UPPER.length], cx, beamY, upperBeamY, ox, oy, th, rnd);
+      this._placeClutter(g, cx, gy, beamY, upperBeamY, ox, oy, th, rnd);
     }
 
     // pillars span both storeys; beams cross over them
@@ -252,9 +253,58 @@ PL.World = {
         this._dyn.push({ type: 'glow', x: cx + dx + 5, y: gy - 8 + h, color: col });
       }
       put(T2.skullPlaque(), cx - 8, gy - 110);
+    } else if (mod === 'forge') {
+      put(T2.furnace(), cx - 48, gy - 30);
+      this._dyn.push({ type: 'forge', x: cx - 48 + 13, y: gy - 9 });
+      put(T2.anvil(), cx - 16, gy - 11);
+      put(T2.weaponRack(), cx + 8, gy - 30);
+      put(T2.crate(Math.floor(rnd() * 9)), cx + 40, gy - 13);
+      put(T2.itemFrame('shield'), cx - 7, gy - 104);
+    } else if (mod === 'storage') {
+      put(T2.crate(0), cx - 50, gy - 13);
+      put(T2.crate(1), cx - 37, gy - 13);
+      put(T2.crate(1), cx - 44, gy - 26);
+      put(T2.clock(), cx - 7, gy - 38);
+      this._dyn.push({ type: 'pendulum', x: cx, y: gy - 23 });
+      put(T2.clayPot(0), cx + 14, gy - 12);
+      put(T2.clayPot(2), cx + 23, gy - 12);
+      put(T2.barrel(), cx + 33, gy - 15);
+      put(T2.itemFrame(pick(['sword', 'bow', 'staff'])), cx - 7, gy - 104);
+      this._addChandelier(g, cx, beamY, ox, oy);
     } else {
       put(T2.chest(1), cx - 8, gy - 12);
     }
+  },
+
+  // Small floor clutter by the pillars and cobwebs in beam corners; varies per bay and theme.
+  _placeClutter(g, cx, gy, beamY, upperBeamY, ox, oy, th, rnd) {
+    const put = (img, x, y) => g.drawImage(img, Math.round(x) + ox, Math.round(y) + oy);
+    const T2 = PL.Tiles, list = th.clutter || ['pot', 'crate'];
+    const left = cx - PILLAR_GAP / 2 + PILLAR_W / 2 + 2, right = cx + PILLAR_GAP / 2 - PILLAR_W / 2 - 2;
+    for (const side of [-1, 1]) {
+      if (rnd() > 0.55) continue;
+      const kind = list[Math.floor(rnd() * list.length)];
+      const edge = side < 0 ? left : right;
+      if (kind === 'pot') { const img = T2.clayPot(Math.floor(rnd() * 3)); put(img, side < 0 ? edge : edge - img.width, gy - img.height); }
+      else if (kind === 'crate') put(T2.crate(Math.floor(rnd() * 2)), side < 0 ? edge : edge - 13, gy - 13);
+      else if (kind === 'bones') put(T2.bonePile(), side < 0 ? edge : edge - 20, gy - 9);
+      else if (kind === 'gold') {
+        const x = side < 0 ? edge : edge - 18;
+        put(T2.goldPile(), x, gy - 9);
+        this._dyn.push({ type: 'sparkle', x: x + 9, y: gy - 6 });
+      } else if (kind === 'mush' || kind === 'mushGlow') {
+        const glow = kind === 'mushGlow', x = side < 0 ? edge : edge - 16;
+        put(T2.mushrooms(glow), x, gy - 12);
+        if (glow) this._dyn.push({ type: 'glow', x: x + 8, y: gy - 6, color: '#4ad8e8', r: 34, i: 0.35 });
+      }
+    }
+    const webs = th.webs || 0.2;
+    g.save(); g.globalAlpha = 0.5;
+    for (const ceil of [beamY + 9, upperBeamY + 9]) {
+      if (rnd() < webs) put(T2.cobweb(false), left - 1, ceil);
+      if (rnd() < webs) put(T2.cobweb(true), right - 15, ceil);
+    }
+    g.restore();
   },
 
   // Upper storey: stands on the beam (floorY), hangs from the upper beam (ceilY).
@@ -326,7 +376,27 @@ PL.World = {
       } else if (d.type === 'lamp') {
         PL.Lighting.add(d.x, d.y, 70, 0.5, true);
       } else if (d.type === 'glow') {
-        PL.Lighting.add(d.x, d.y, 56, 0.45, false, d.color);
+        PL.Lighting.add(d.x, d.y, d.r || 56, d.i || 0.45, false, d.color);
+      } else if (d.type === 'forge') {
+        ctx.drawImage(PL.Tiles.flame(fr + seed), sx - 7, d.y - 4);
+        ctx.drawImage(PL.Tiles.flame(fr + seed + 1), sx - 1, d.y - 6);
+        ctx.drawImage(PL.Tiles.smallFlame(fr + 2), sx + 4, d.y);
+        PL.Lighting.add(d.x, d.y, 80 + (fr % 3) * 4, 0.95, true);
+      } else if (d.type === 'pendulum') {
+        const ang = Math.sin(t * 2.6) * 0.32;
+        const L = 8, ex = Math.round(sx + Math.sin(ang) * L), ey = Math.round(d.y + Math.cos(ang) * L);
+        ctx.fillStyle = '#a87a1c';
+        for (let k = 1; k < L; k += 2) ctx.fillRect(Math.round(sx + Math.sin(ang) * k), Math.round(d.y + Math.cos(ang) * k), 1, 1);
+        ctx.fillStyle = '#e0b040'; ctx.fillRect(ex - 1, ey - 1, 3, 3);
+        ctx.fillStyle = '#ffe08a'; ctx.fillRect(ex - 1, ey - 1, 1, 1);
+      } else if (d.type === 'sparkle') {
+        const ph = (t * 1.3 + seed * 0.37) % 2.2;
+        if (ph < 0.35) {
+          const k = ph < 0.12 || ph > 0.23 ? 1 : 2, sx2 = Math.round(sx + seed * 3 - 3);
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(sx2, d.y, 1, 1);
+          if (k > 1) { ctx.fillRect(sx2 - 1, d.y, 3, 1); ctx.fillRect(sx2, d.y - 1, 1, 3); }
+        }
+        PL.Lighting.add(d.x, d.y, 22, 0.18, true);
       } else if (d.type === 'window') {
         this._drawWindow(ctx, Math.round(sx), d.y, d.x, th, t);
         PL.Lighting.add(d.x + 14, d.y + 18, 86, 0.45, false, th.windowLight);
@@ -341,9 +411,9 @@ PL.World = {
     const top = this.groundY - (PL.VIEW_H - 48), x0 = camX, x1 = camX + PL.VIEW_W;
     for (const d of this._dyn) {
       if (d.x < x0 - 20 || d.x > x1 + 20) continue;
-      const rate = d.type === 'torch' ? 2.5 : d.type === 'chandelier' ? 1.2 : 0;
+      const rate = d.type === 'torch' ? 2.5 : d.type === 'forge' ? 4 : d.type === 'chandelier' ? 1.2 : 0;
       if (rate && Math.random() < dt * rate) {
-        const ex = d.type === 'torch' ? d.x + 3 : d.x + PL.U.choose([4, 14, 24]);
+        const ex = d.type === 'torch' ? d.x + 3 : d.type === 'forge' ? d.x + PL.U.rand(-4, 4) : d.x + PL.U.choose([4, 14, 24]);
         fx.push({ x: ex + PL.U.rand(-1, 1), y: d.y + 1, vx: PL.U.rand(-6, 6), vy: -PL.U.rand(14, 32), t: 0, life: PL.U.rand(0.7, 1.5), c: PL.U.choose(['#ffd04a', '#ff8a2a', '#fff0a0']), a: 1, s: 1, wob: 2 });
       }
     }

@@ -85,6 +85,45 @@ window.PL = window.PL || {};
     '.aAARAAAARAAa.', '.aAARRAAAAAAa.', '.aAAAAAARaAAa.', '..aAAAAAARAa..', '..aAAaAAAAAa..', '...aaa..aaa...'
   ];
 
+  // ---------------- Extra heads / torsos (new enemies) ----------------
+  const HEAD_ZOMBIE = [
+    '............', '...hHH.hH...', '..hHHHHHHH..', '.hHHHHHHHHH.', '.hHHSSSSSSH.', '.hHSSSSSSSS.',
+    '..hSSdESSeE.', '..hSSSSSSSS.', '..sSSSSSSSs.', '...sSdTdTs..', '....sssss...', '............'
+  ];
+  const TORSO_TORN = [
+    '.cCCCCCCc.', 'cCLCCCCCCc', 'cCCCSCCCCc', '.cCCSSCCc.', '.cCCCSCCc.', '.cCCCCCCc.',
+    '.bBBBBBBb.', '.pPPPPPPp.', '.pPPpPPPp.', '.pP.pPP.p.', '.p...p....'
+  ];
+  const HEAD_MUMMY = [
+    '............', '...wWWWWw...', '..wWdWWWWW..', '.wWWWWdWWWW.', '.wWdWWWWWdW.', '.wWWWWWWWWW.',
+    '.wWWdWdEWdE.', '..wWWWWWWWW.', '..wWdWWWdWW.', '...wWWWWWw..', '....wwwww...', '............'
+  ];
+  const TORSO_MUMMY = [
+    '.wWWWWWWw.', 'wWdWWWWWdW', 'wWWWdWWWWw', '.wWWWWdWw.', '.wdWWWWWw.', '.wWWWdWWw.',
+    '.wWWWWWdw.', '.wWdWWWWw.', '.wWWWWdWw.', '.wWWdWWWw.', '.wWWWWWWw.', '.w.dW.Ww..'
+  ];
+  const TORSO_PHARAOH = [
+    '.GBGBGBGG.', 'GBGBGBGBGG', 'wGGRGGGGdW', '.wWWWWdWw.', '.wdWWWWWw.', '.wWWWdWWw.',
+    '.wWWWWWdw.', '.GGGGGGGG.', '.BWBWBWBW.', '.BWBWBWBW.', '.BWBWBWBW.', '.B.BW.BW..'
+  ];
+  const NEMES = { dx: 0, dy: -2, rows: ['....gGGg....', '..gGBGGBGgR.', '.gGBGGBGGBg.', 'gGB.........', 'gBG.........', 'gGB.........', 'gBG.........', '.gB.........', '.gG.........'] };
+  const HEAD_IMP = [
+    '.k.......k..', '.kk.....kk..', '..kRRRRRk...', '..RRRRRRRR..', '.rRRRRRRRRR.', '.rRRRdddRdd.',
+    '.rRRRReERReE', '..rRRRRRRRRR', '..rRRRTRTRR.', '...rRRRRRr..', '....rrrrr...'
+  ];
+  const TORSO_IMP = [
+    '..rRRRRr..', '.rRLRRRRr.', '.rRRRRRRr.', '..rRRRRr..', '..rRRRRr..', '..bBBBBb..',
+    '..rRRRRr..', '..rR..Rr..', '..r....r..'
+  ];
+  const HEAD_MUSHROOM = [
+    '...rRRRRRr....', '..rRWRRRRRRr..', '.rRWWRRRWWRRr.', 'rRRRRRRRWWRRRr', 'rRRRRRRRRRRRRr', '.rrrrrrrrrrrr.',
+    '....sSSSSSs...', '....sSSeESS...', '....sSSSSSs...', '....sSSdSSs...', '.....sSSSs....'
+  ];
+  const TORSO_STALK = [
+    '...sSSs...', '..sSSSSs..', '..sSLSSs..', '..sSSSSs..', '..sSSSSs..', '..sSSSSs..',
+    '..sSSSSs..', '.sSSSSSSs.', '.ssssssss.'
+  ];
+
   // ---------------- Non-humanoid parts ----------------
   const WOLF_BODY = [
     '...aaAAAAAAAAa....', '.aAAALLAAAAAAAAa..', 'aAAAAAAAAAAAAAAAa.', 'aAAAAAAAAAAAAAAAAa',
@@ -172,6 +211,38 @@ window.PL = window.PL || {};
       limbs: limbs('#8a3a4a', '#e0cfa0', '#e0cfa0', '#e8b030')
     },
 
+    // ======== New normal enemies ========
+    zombie: {
+      head: HEAD_ZOMBIE, torso: TORSO_TORN, rest: { front: 1.45, back: 1.35 },
+      pal: { H: '#3a2e1e', h: '#241c10', S: '#7aa86a', s: '#4e7a44', d: '#2a3a20', e: '#ffffff', E: '#ffd84a', T: '#d8d0a0', C: '#4a6a9a', c: '#2e4468', L: '#6a8aba', B: '#4a3420', b: '#2e2010', P: '#5a4a3a', p: '#3a2e22' },
+      limbs: limbs('#4a6a9a', '#7aa86a', '#4a3e30', '#2e2418')
+    },
+    mummy: {
+      head: HEAD_MUMMY, torso: TORSO_MUMMY, rest: { front: 1.5, back: 1.4 },
+      pal: { W: '#d8ccaa', w: '#a8987a', d: '#7a6a50', E: '#ffe040' },
+      limbs: limbs('#cfc2a0', '#b8aa88', '#c4b694', '#9a8a6c')
+    },
+    dark_imp: {
+      head: HEAD_IMP, torso: TORSO_IMP, legScale: 0.64, legThick: 3, armThick: 2,
+      back: { type: 'wings', color: '#5a1a2a', light: '#c03a3a' },
+      pal: { R: '#c03a3a', r: '#7a1e22', L: '#e05a4a', k: '#2a1a1a', d: '#4a0e10', e: '#ffe060', E: '#ff2020', T: '#fff0d0', B: '#3a2a1a', b: '#241a10' },
+      limbs: limbs('#c03a3a', '#a83030', '#a83030', '#2a1a1a')
+    },
+    mushroom_man: {
+      head: HEAD_MUSHROOM, torso: TORSO_STALK, legScale: 0.64, legThick: 3, armThick: 2,
+      pal: { R: '#d83a3a', r: '#8a1e22', W: '#fff4e8', S: '#e8dcc0', s: '#b0a080', L: '#fff8ea', e: '#ffffff', E: '#2a1a10', d: '#6a4a30' },
+      limbs: limbs('#e8dcc0', '#d0c4a8', '#d0c4a8', '#a08a68')
+    },
+    ice_slime: { kind: 'blob', hitW: 16, pal: { A: '#6ac8f0', a: '#3a8ac0', L: '#e0f8ff', d: '#2a6a9a', E: '#0e2a3a' }, glow: { r: 26, i: 0.12, color: '#8ad8ff' } },
+    lava_slime: { kind: 'blob', hitW: 16, pal: { A: '#ff7a1a', a: '#c83a0a', L: '#ffe060', d: '#8a1a04', E: '#2a0a04' }, glow: { r: 36, i: 0.22 } },
+    cave_bat: { kind: 'bat', frame: 40, hitW: 18, pal: { M: '#4a3a5a', a: '#2a1e34', A: '#6a5070', L: '#8a7088', E: '#ff3030', T: '#ffffff' } },
+    demon_eye: { kind: 'eye', frame: 40, hitW: 16, pal: { W: '#f4ece0', w: '#c8b8a8', r: '#c02a3a', I: '#3a8ad0', d: '#0a0a14' } },
+    skeleton_archer: {
+      head: HEAD_SKULL, torso: TORSO_RIBS, weapon: 'bow', armThick: 2, legThick: 2, back: quiver('#c8b8a0', '#e8e2d0', '#4a3a2a', '#2e2418'),
+      weaponPal: { h: '#5a4a3a', H: '#8a7a6a', w: '#e8e2d0' },
+      pal: { T: '#e8e2d0', t: '#a89e88', W: '#ffffff', d: '#2a2026', E: '#ff4030' },
+      limbs: limbs('#e8e2d0', '#d0c8b4', '#e8e2d0', '#a89e88')
+    },
     // ======== Elites ========
     elite_orc_berserker: {
       head: HEAD_ORC, headOver: [BERSERK_HELM], torso: TORSO_ORC, weapon: 'greataxe', legScale: 1.25, legThick: 5, armThick: 5, hipSpread: 3,
@@ -201,6 +272,19 @@ window.PL = window.PL || {};
       weaponPal: { h: '#4a6a80', H: '#8dd9ff', G: '#ffffff', w: '#e8f8ff' },
       pal: { H: '#8aaac4', h: '#5a7a96', Y: '#e8f4ff', d: '#2a4a60', S: '#e8c8a8', s: '#b89878', e: '#ffffff', E: '#3a8ad0', A: '#2a4a6a', a: '#182e44', L: '#3e6a92', B: '#d8e8f0', b: '#a8c0d0', G: '#8dd9ff' },
       limbs: limbs('#2a4a6a', '#cfe0ea', '#182e44', '#d8e8f0')
+    },
+
+    elite_necromancer: {
+      head: HEAD_HOOD, torso: TORSO_ROBE, torsoAbove: 12, weapon: 'staff', weaponPal: { B: '#6aff8a', H: '#e8e2d0', h: '#a89e88' },
+      back: { type: 'cape', color: '#1a2a1e', len: 6 },
+      pal: { H: '#1e2a22', h: '#0e1610', Y: '#2e4234', d: '#040806', S: '#d8d4c4', s: '#a09c8c', e: '#b0ffc0', E: '#6aff8a', A: '#1e2a22', a: '#0e1610', L: '#2e4234', B: '#6aff8a', G: '#e8e2d0' },
+      limbs: limbs('#1e2a22', '#d8d4c4', '#0e1610', '#080c0a')
+    },
+    elite_pharaoh: {
+      head: HEAD_MUMMY, headOver: [NEMES], torso: TORSO_PHARAOH, weapon: 'axe', legScale: 1.1, legThick: 4, armThick: 3, hipSpread: 3,
+      weaponPal: { M: '#e0b040', m: '#8a6a20', W: '#fff0a0' },
+      pal: { W: '#d8ccaa', w: '#a8987a', d: '#7a6a50', E: '#40e0ff', G: '#e0b040', g: '#8a6a20', B: '#2a4aa0', R: '#c02040' },
+      limbs: limbs('#cfc2a0', '#b8aa88', '#c4b694', '#e0b040')
     },
 
     // ======== Bosses (authored at 1x, displayed at 2x) ========

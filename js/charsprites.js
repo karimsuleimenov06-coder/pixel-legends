@@ -292,7 +292,50 @@ PL.CharSprites = (function () {
     return out;
   }
 
+  function composeBat(s, p) {
+    const { F, AX, FOOT } = dims(s);
+    const P = s.pal, cy = FOOT - 6, b = mk(F, F);
+    const wing = p.frame === 'up'
+      ? [[AX - 2, cy - 1], [AX - 9, cy - 8], [AX - 13, cy - 4], [AX - 10, cy - 1], [AX - 7, cy + 1]]
+      : [[AX - 2, cy], [AX - 9, cy + 5], [AX - 13, cy + 1], [AX - 10, cy + 2], [AX - 6, cy + 3]];
+    b.polygon(wing, P.M);
+    b.polygon(wing.map(([x, y]) => [2 * AX - x, y]), P.M);
+    b.line(AX - 2, cy, wing[2][0], wing[2][1], P.a, 1);
+    b.line(AX + 2, cy, 2 * AX - wing[2][0], wing[2][1], P.a, 1);
+    for (let y = cy - 4; y <= cy + 4; y++) for (let x = AX - 4; x <= AX + 4; x++) {
+      const nx = (x - AX) / 3.6, ny = (y - cy) / 4.2;
+      if (nx * nx + ny * ny <= 1) b.put(x, y, ny > 0.3 ? P.L : P.A);
+    }
+    b.put(AX - 2, cy - 5, P.A); b.put(AX - 2, cy - 6, P.A); b.put(AX + 2, cy - 5, P.A); b.put(AX + 2, cy - 6, P.A);
+    b.put(AX + 1, cy - 1, P.E); b.put(AX + 3, cy - 1, P.E);
+    b.put(AX + 1, cy + 2, P.T); b.put(AX + 3, cy + 2, P.T);
+    b.volume(0.2, 0.2).outline();
+    return b;
+  }
+
+  function composeEye(s, p) {
+    const { F, AX, FOOT } = dims(s);
+    const P = s.pal, cx = AX + 2, cy = FOOT - 8, R = 6.5, b = mk(F, F);
+    for (let i = 0; i < 3; i++) {
+      const y0 = cy - 3 + i * 3, w = p.frame ? (i % 2 ? 2 : -2) : (i % 2 ? -2 : 2);
+      b.line(cx - 5, y0, cx - 10, y0 + w, P.r, 2);
+      b.line(cx - 10, y0 + w, cx - 15, y0 - w, P.r, 1);
+    }
+    for (let y = Math.floor(cy - R); y <= cy + R; y++) for (let x = Math.floor(cx - R); x <= cx + R; x++) {
+      const d = Math.hypot(x - cx, y - cy);
+      if (d <= R) b.put(x, y, (x < cx - 2 && y > cy + 1) ? P.w : P.W);
+    }
+    for (const [vx, vy] of [[-5, -2], [-4, -3], [-5, 2], [-4, 3], [-3, 4], [0, 6], [-1, -6]]) b.put(cx + vx, cy + vy, P.r);
+    for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx; x <= cx + 6; x++) {
+      if (Math.hypot(x - (cx + 3), y - cy) <= 3) b.put(x, y, Math.hypot(x - (cx + 4), y - cy) <= 1.6 ? P.d : P.I);
+    }
+    b.put(cx + 2, cy - 2, '#ffffff');
+    b.volume(0.15, 0.2).outline();
+    return b;
+  }
+
   function normalize(s, pose) {
+    if (s.kind === 'bat' || s.kind === 'eye') return { key: 'x|' + pose.frame, p: pose };
     if (s.kind === 'blob') return { key: 'b|' + pose.frame, p: pose };
     if (s.kind === 'quad') return { key: 'q|' + pose.frame + '|' + (pose.mouth ? 1 : 0), p: pose };
     if (s.kind === 'dragon') return { key: 'd|' + pose.legs + '|' + (pose.wing ? 1 : 0) + '|' + (pose.mouth ? 1 : 0), p: pose };
@@ -311,7 +354,8 @@ PL.CharSprites = (function () {
     let f = frames[key];
     if (!f) {
       let buf = s.kind === 'blob' ? composeBlob(s, n.p) : s.kind === 'quad' ? composeQuad(s, n.p)
-        : s.kind === 'dragon' ? composeDragon(s, n.p) : composeHumanoid(s, n.p);
+        : s.kind === 'dragon' ? composeDragon(s, n.p) : s.kind === 'bat' ? composeBat(s, n.p)
+          : s.kind === 'eye' ? composeEye(s, n.p) : composeHumanoid(s, n.p);
       if ((s.pixelScale || 1) > 1) buf = buf.upscale(s.pixelScale);
       f = frames[key] = { buf, right: buf.toCanvas(), left: null, fx: {} };
     }
@@ -322,6 +366,8 @@ PL.CharSprites = (function () {
     if (s.kind === 'blob') return { frame: 'idle0' };
     if (s.kind === 'quad') return { frame: 'stand' };
     if (s.kind === 'dragon') return { legs: 'stand', wing: 0 };
+    if (s.kind === 'bat') return { frame: 'up' };
+    if (s.kind === 'eye') return { frame: 0 };
     return { legs: 'stand', front: 0.4, back: 0.15 };
   }
 
@@ -369,21 +415,23 @@ PL.CharSprites = (function () {
       if (a) fr = a.stage === 'windup' ? 'run1' : 'run0';
       return { frame: fr, mouth: !!(a && a.stage !== 'recover') };
     }
+    if (s.kind === 'bat') return { frame: Math.floor((st.time || 0) * (a ? 16 : 10)) % 2 ? 'up' : 'down' };
+    if (s.kind === 'eye') return { frame: Math.floor((st.time || 0) * (a ? 10 : 5)) % 2 };
     if (s.kind === 'dragon') {
       const walk = st.move === 'run' ? (Math.floor((st.phase || 0) / Math.PI) % 2 ? 'walk1' : 'walk0') : 'stand';
       return { legs: walk, wing: Math.floor((st.time || 0) * (a ? 9 : 4)) % 2, mouth: !!(a && (a.stage === 'active' || a.style === 'breath' && a.stage !== 'windup')) };
     }
 
-    const R = REST[s.weapon || 'none'];
+    const R = Object.assign({ back: 0.15 }, REST[s.weapon || 'none'], s.rest || {});
     const hasW = !!s.weapon;
-    const p = { legs: 'stand', front: R.front, back: 0.15, weapon: hasW ? R.weapon : null, extra: Math.floor((st.time || 0) * (s.back && s.back.type === 'wings' ? 8 : 2)) % 2 };
+    const p = { legs: 'stand', front: R.front, back: R.back, weapon: hasW ? R.weapon : null, extra: Math.floor((st.time || 0) * (s.back && s.back.type === 'wings' ? 8 : 2)) % 2 };
     if (st.move === 'jump' || st.move === 'fall') {
       p.legs = st.move; p.front = 1.2; p.back = -0.7; if (hasW) p.weapon = R.weapon + 0.2;
     } else if (st.move === 'crouch') {
       p.legs = 'crouch'; p.front = 1.3; p.back = -0.4; if (hasW) p.weapon = 1.6;
     } else if (st.move === 'run') {
       const sn = Math.sin(st.phase || 0);
-      p.legs = runFrame; p.front = R.front + sn * 0.35; p.back = 0.1 - sn * 0.6; if (hasW) p.weapon = R.weapon + sn * 0.2;
+      p.legs = runFrame; p.front = R.front + sn * 0.35; p.back = R.back - 0.05 - sn * (s.rest ? 0.2 : 0.6); if (hasW) p.weapon = R.weapon + sn * 0.2;
     }
     if (st.hurt) { p.front = -0.3; p.back = -0.5; if (hasW) p.weapon = (R.weapon || 0) + 0.5; }
 

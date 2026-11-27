@@ -390,8 +390,174 @@ PL.Tiles = (function () {
     });
   }
 
+
+  // ---------------- Extra decor: forge, storage, clutter ----------------
+  const STONE = { base: '#6a6470', light: '#8a8492', dark: '#45404c' };
+
+  function anvil() {
+    return memo('anvil', () => {
+      const b = new (Buf())(18, 11);
+      b.rect(0, 0, 14, 3, IRON.base); b.rect(14, 1, 4, 1, IRON.base); b.rect(15, 2, 2, 1, IRON.dark);
+      b.rect(0, 0, 14, 1, IRON.light); b.rect(14, 1, 3, 1, IRON.light);
+      b.rect(4, 3, 7, 3, IRON.dark); b.rect(5, 3, 5, 1, IRON.base);
+      b.rect(2, 6, 11, 2, IRON.base); b.rect(2, 6, 11, 1, IRON.light);
+      b.rect(1, 8, 13, 3, WOOD.dark); b.rect(1, 8, 13, 1, WOOD.base);
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  // Stone forge with a dark arched mouth; the fire itself is animated by the world layer.
+  function furnace() {
+    return memo('furnace', () => {
+      const b = new (Buf())(26, 30);
+      for (let y = 0; y < 30; y++) for (let x = 0; x < 26; x++) {
+        if (y < 6 && (x < 8 || x > 17)) continue; // chimney
+        const row = Math.floor(y / 4), off = row % 2 ? 3 : 0;
+        const mortar = y % 4 === 3 || (x + off) % 7 === 6;
+        const n = PL.U.hashNoise(x, y, 41);
+        b.put(x, y, mortar ? STONE.dark : n > 0.75 ? STONE.light : STONE.base);
+      }
+      b.rect(8, 0, 10, 1, STONE.light);
+      // arched opening
+      for (let y = 14; y < 27; y++) for (let x = 6; x < 20; x++) {
+        const dx = x - 12.5, dy = y - 19;
+        if (y >= 19 || dx * dx + dy * dy * 1.6 < 42) b.put(x, y, y > 23 ? '#3a1408' : '#140806');
+      }
+      b.rect(4, 26, 18, 2, STONE.light); b.rect(4, 27, 18, 1, STONE.dark);
+      b.rect(9, 24, 8, 2, '#6a2a10'); b.put(11, 24, '#ff8a2a'); b.put(14, 25, '#ffd04a'); // embers bed
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  function crate(seed) {
+    return memo('crate|' + (seed % 2), () => {
+      const b = new (Buf())(13, 13);
+      b.rect(0, 0, 13, 13, WOOD.base);
+      for (let y = 0; y < 13; y += 4) b.rect(0, y, 13, 1, WOOD.dark);
+      b.rect(0, 0, 13, 2, WOOD.light); b.rect(0, 11, 13, 2, WOOD.light);
+      b.rect(0, 0, 2, 13, WOOD.light); b.rect(11, 0, 2, 13, WOOD.light);
+      if (seed % 2) b.line(2, 10, 10, 2, WOOD.light, 2); else b.line(2, 2, 10, 10, WOOD.light, 2);
+      for (const [x, y] of [[1, 1], [11, 1], [1, 11], [11, 11]]) b.put(x, y, IRON.light);
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  const POTS = [
+    { c: '#b8603a', w: 9, rows: ['..ddd..', '..ccc..', '.ccccc.', 'cLccccc', 'cLcPPcc', 'cccPPcc', 'ccccccc', '.ccccc.', '..ccc..'] },
+    { c: '#a8704a', w: 9, rows: ['.ddddd.', '.ccccc.', 'cLccccc', 'cLccccc', 'cPPPPPc', 'ccccccc', '.ccccc.'] },
+    { c: '#7a8a9a', w: 9, rows: ['...d...', '..ccc..', '..ccc..', '.cLccc.', 'cLccccc', 'cLcPcPc', 'ccccccc', 'ccccccc', '.ccccc.', '..ccc..'] }
+  ];
+  function clayPot(v) {
+    v = ((v % POTS.length) + POTS.length) % POTS.length;
+    return memo('pot|' + v, () => {
+      const P = POTS[v], b = new (Buf())(9, 12);
+      b.grid(P.rows, { c: P.c, L: sh(P.c, 0.3), d: sh(P.c, -0.4), P: sh(P.c, -0.25) }, 1, 12 - P.rows.length);
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  function weaponRack() {
+    return memo('weaponRack', () => {
+      const b = new (Buf())(30, 30);
+      // weapons behind the bars
+      b.rect(5, 2, 1, 26, WOOD.dark); b.rect(4, 0, 3, 3, IRON.light); b.put(5, 0, '#ffffff');           // spear
+      b.rect(12, 4, 2, 18, IRON.light); b.rect(12, 4, 1, 18, '#e6eaf0'); b.rect(10, 22, 6, 1, GOLD.base); b.rect(12, 23, 2, 4, WOOD.dark); // sword
+      b.rect(20, 3, 1, 25, WOOD.base); b.rect(21, 3, 4, 6, IRON.base); b.rect(24, 2, 1, 8, IRON.light); // axe
+      b.rect(26, 6, 1, 22, WOOD.dark); b.put(25, 5, IRON.light); b.put(27, 5, IRON.light); b.put(26, 4, IRON.light); // pitchfork-ish pike
+      // frame
+      b.rect(0, 9, 30, 2, WOOD.base); b.rect(0, 9, 30, 1, WOOD.light);
+      b.rect(0, 25, 30, 3, WOOD.base); b.rect(0, 25, 30, 1, WOOD.light);
+      b.rect(0, 9, 2, 21, WOOD.dark); b.rect(28, 9, 2, 21, WOOD.dark);
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  // Tall clock; the pendulum swings in the world layer.
+  function clock() {
+    return memo('clock', () => {
+      const b = new (Buf())(14, 38);
+      b.rect(1, 2, 12, 36, WOOD.dark); b.rect(2, 2, 10, 36, WOOD.base);
+      b.rect(0, 0, 14, 3, WOOD.light); b.rect(0, 35, 14, 3, WOOD.light);
+      b.rect(3, 4, 8, 8, GOLD.dark);
+      for (let y = 5; y < 11; y++) for (let x = 4; x < 10; x++) if ((x - 6.5) ** 2 + (y - 7.5) ** 2 < 9.5) b.put(x, y, '#f0e8d0');
+      b.rect(7, 6, 1, 2, '#2a2020'); b.rect(7, 8, 2, 1, '#2a2020');
+      b.rect(4, 14, 6, 19, '#24160c'); b.rect(4, 14, 6, 1, WOOD.dark);
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
+  function cobweb(flip) {
+    return memo('cobweb|' + !!flip, () => {
+      const b = new (Buf())(16, 16), c = '#d4d4e0';
+      const put = (x, y) => b.put(flip ? 15 - x : x, y, c);
+      for (let i = 0; i < 16; i++) { put(i, 0); put(0, i); }
+      for (let i = 0; i < 12; i++) put(i, i);
+      for (let i = 0; i < 14; i++) { put(i, Math.floor(i * 0.45)); put(Math.floor(i * 0.45), i); }
+      for (const r of [4, 8, 12]) for (let a = 0; a <= 12; a++) {
+        const t = a / 12 * Math.PI / 2;
+        put(Math.round(Math.cos(t) * r * (1 + 0.08 * Math.sin(a * 2))), Math.round(Math.sin(t) * r));
+      }
+      return b.toCanvas();
+    });
+  }
+
+  function bonePile() {
+    return memo('bonePile', () => {
+      const b = new (Buf())(20, 9);
+      const B = '#e8e2d0', d = '#a89e88';
+      b.line(1, 7, 10, 5, B, 2); b.put(0, 6, B); b.put(0, 8, B); b.put(11, 4, B); b.put(11, 6, B);
+      b.line(7, 8, 17, 7, d, 2); b.put(18, 6, d); b.put(18, 8, d);
+      // skull
+      b.rect(10, 1, 7, 5, B); b.rect(11, 0, 5, 1, B); b.rect(11, 6, 5, 2, B);
+      b.put(12, 3, '#2a2026'); b.put(15, 3, '#2a2026'); b.put(12, 2, '#2a2026'); b.put(15, 2, '#2a2026');
+      b.put(12, 7, d); b.put(14, 7, d);
+      b.volume(0.15, 0.2).outline();
+      return b.toCanvas();
+    });
+  }
+
+  function mushrooms(glow) {
+    return memo('mush|' + !!glow, () => {
+      const b = new (Buf())(16, 12);
+      const cap = glow ? '#4ad8e8' : '#c85a3a', stem = glow ? '#bfe8f0' : '#e8dcc0';
+      for (const [x, h, w] of [[2, 6, 5], [8, 9, 7], [12, 4, 4]]) {
+        b.rect(x + (w >> 1) - 1, 12 - h, 2, h, stem);
+        const cy = 12 - h;
+        b.rect(x, cy - 1, w, 2, cap); b.rect(x + 1, cy - 2, w - 2, 1, cap);
+        b.put(x + 1, cy - 1, glow ? '#e0ffff' : '#fff4e8');
+        if (w > 4) b.put(x + w - 2, cy, glow ? '#e0ffff' : '#fff4e8');
+      }
+      b.volume(0.25, 0.2).outline(glow ? -0.5 : -0.72);
+      return b.toCanvas();
+    });
+  }
+
+  function goldPile() {
+    return memo('goldPile', () => {
+      const b = new (Buf())(18, 9);
+      for (let y = 0; y < 9; y++) {
+        const half = Math.round(1 + 7.5 * Math.sqrt(y / 8));
+        for (let x = 9 - half; x <= 9 + half; x++) {
+          const n = PL.U.hashNoise(x, y, 17);
+          b.put(x, y, n > 0.8 ? GOLD.light : n < 0.25 ? GOLD.dark : GOLD.base);
+        }
+      }
+      b.put(6, 3, '#ffffff'); b.put(12, 5, '#ffffff');
+      b.rect(13, 6, 3, 3, '#3a8ae0'); b.put(13, 6, '#9ad0ff'); // a gem
+      b.outline();
+      return b.toCanvas();
+    });
+  }
+
   return {
     armorStand, tombstone, tile, torchBase, flame, smallFlame, chandelier, lantern, banner, chest, barrel, bookshelf, table,
-    candleStick, itemFrame, skullPlaque, plant, potionShelf, windowFrame, crystal, WOOD, IRON, GOLD
+    candleStick, itemFrame, skullPlaque, plant, potionShelf, windowFrame, crystal, WOOD, IRON, GOLD,
+    anvil, furnace, crate, clayPot, weaponRack, clock, cobweb, bonePile, mushrooms, goldPile
   };
 })();
