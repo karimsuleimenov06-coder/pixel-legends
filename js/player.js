@@ -14,10 +14,7 @@ const PLAYER_ATTACK_ANIM = {
   mage: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'raise' } },
   archer: { light: [{ style: 'shoot' }], heavy: { style: 'shoot' }, q: { style: 'shootUp' }, e: { style: 'shoot' } },
   necromancer: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'slam' } },
-  cleric: {
-    light: [{ style: 'swing', from: 3.2, to: 0.5 }, { style: 'swing', from: 0.5, to: 3.0 }, { style: 'swing', from: 3.5, to: 0.3 }],
-    heavy: { style: 'slam' }, q: { style: 'raise' }, e: { style: 'slam' }
-  },
+  cleric: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'slam' } },
   guardian: {
     light: [{ style: 'swing', from: 3.0, to: 0.6 }, { style: 'thrust' }, { style: 'swing', from: 3.4, to: 0.3 }],
     heavy: { style: 'bash' }, q: { style: 'guard' }, e: { style: 'bash' }

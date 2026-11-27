@@ -45,11 +45,6 @@ PL.CharSprites = (function () {
         '..H..', '..h..', '..H..', '..h..', '..H..', '..h..', '..H..', '..h..', '..g..'],
       px: 2, py: 14
     },
-    mace: {
-      pal: { M: '#e8d070', W: '#fff4c0', m: '#a88a30', S: '#d0d4dc', H: '#8a5a30', h: '#5a3a1e', G: '#e0b040' },
-      rows: ['..S..', '.mMm.', 'SMWMS', 'mMMMm', '.mMm.', '..S..', '..h..', '..H..', '..h..', '..H..', '..h..', '..H..', '..G..', '..h..'],
-      px: 2, py: 11
-    },
     skullStaff: {
       pal: { T: '#ece6d4', t: '#a89e88', E: '#6aff8a', d: '#1a1420', H: '#4a3a4a', h: '#2e2232', g: '#8a7aa0' },
       rows: ['.tTTt.', 'tTTTTt', 'TEdTEd', 'tTTTTt', '.tdTd.', '..gg..', '..hH..', '..Hh..', '..hH..', '..Hh..', '..hH..',
@@ -85,7 +80,7 @@ PL.CharSprites = (function () {
   // Resting pose (arm + weapon angle) per weapon; 0 = arm down, PI/2 = forward, PI = up.
   const REST = {
     greatsword: { front: 0.45, weapon: 2.4 }, sword: { front: 0.45, weapon: 2.3 }, axe: { front: 0.45, weapon: 2.2 },
-    greataxe: { front: 0.45, weapon: 2.3 }, dagger: { front: 0.5, weapon: 1.3 }, staff: { front: 0.5, weapon: 3.1 }, skullStaff: { front: 0.5, weapon: 3.1 }, mace: { front: 0.45, weapon: 2.3 },
+    greataxe: { front: 0.45, weapon: 2.3 }, dagger: { front: 0.5, weapon: 1.3 }, staff: { front: 0.5, weapon: 3.1 }, skullStaff: { front: 0.5, weapon: 3.1 },
     bow: { front: 0.55, weapon: 1.0 }, none: { front: 0.3, weapon: null }
   };
 

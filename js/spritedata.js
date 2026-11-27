@@ -168,7 +168,8 @@ window.PL = window.PL || {};
       limbs: limbs('#3e2a5a', '#d8d4c8', '#24183a', '#0e0a14')
     },
     cleric: {
-      head: HEAD_HOOD, headOver: [{ dx: 3, dy: -3, rows: ['.GGGGG.', 'G.....G', '.GGGGG.'] }], torso: TORSO_ROBE, torsoAbove: 12, weapon: 'mace',
+      head: HEAD_HOOD, headOver: [{ dx: 3, dy: -3, rows: ['.GGGGG.', 'G.....G', '.GGGGG.'] }], torso: TORSO_ROBE, torsoAbove: 12, weapon: 'staff',
+      weaponPal: { B: '#ffe070', W: '#ffffff', g: '#e0b040', H: '#f0ece4', h: '#c8c0b0' },
       pal: Object.assign({ H: '#f0ece4', h: '#bdb5a6', Y: '#ffffff', d: '#7a7262', A: '#ece8e0', a: '#b8b0a0', L: '#ffffff', B: '#e0b040', G: '#ffd860' }, SKIN, { E: '#3a6ad0' }),
       limbs: limbs('#ece8e0', '#e6c29a', '#b8b0a0', '#a87a3a')
     },

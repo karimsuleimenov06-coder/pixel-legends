@@ -113,13 +113,13 @@ PL.CLASSES = {
   },
 
   cleric: {
-    id: 'cleric', name: 'Целитель', weaponKind: 'mace',
-    desc: 'Святая булава, мощное лечение и освящённая земля, что жжёт врагов.',
+    id: 'cleric', name: 'Целитель', weaponKind: 'holyStaff',
+    desc: 'Святой свет издалека, мощное лечение и освящённая земля, что жжёт врагов.',
     palette: { skin: '#e6c29a', outfit: '#ece8e0', outfitDark: '#b8b0a0', accent: '#ffd860', hair: '#f0ece4', weapon: '#e8d070' },
-    base: { hp: 105, str: 14, def: 8, spd: 145, crit: 6, energyMax: 120, energyRegen: 15 },
+    base: { hp: 95, str: 15, def: 7, spd: 145, crit: 6, energyMax: 120, energyRegen: 15 },
     growth: { hp: 8, str: 1.3, def: 0.8, spd: 0.4, crit: 0.15 },
-    light: { hits: 3, dmgMult: [1.0, 1.0, 1.35], range: 32, knockback: [50, 50, 120], startup: [0.1, 0.1, 0.13], active: 0.09, recovery: [0.17, 0.17, 0.3] },
-    heavy: { dmgMult: 2.0, range: 42, knockback: 200, startup: 0.28, active: 0.12, recovery: 0.38, lifesteal: 0.25 },
+    light: { hits: 3, dmgMult: [0.9, 0.9, 1.1], range: 220, knockback: [20, 20, 40], startup: [0.14, 0.14, 0.16], active: 0.06, recovery: [0.14, 0.14, 0.22], projectile: true, projColor: '#ffe070' },
+    heavy: { dmgMult: 1.9, range: 250, knockback: 60, startup: 0.3, active: 0.08, recovery: 0.3, projectile: true, pierce: true, projColor: '#fff8d8', lifesteal: 0.2 },
     abilities: [
       { key: 'q', id: 'healingLight', name: 'Исцеляющий свет', cooldown: 12, energyCost: 35, heal: 0.25, regen: 0.04, regenTime: 4, telegraph: 0.15, desc: 'Сразу лечит 25% здоровья и ещё 4% в секунду в течение 4 секунд.' },
       { key: 'e', id: 'sanctuary', name: 'Святая земля', cooldown: 22, energyCost: 50, dmgMult: 0.35, ticks: 12, radius: 110, heal: 0.03, telegraph: 0.3, desc: 'Ульта: освящает землю на 6 секунд. Внутри круга ты лечишься, а враги горят.' }
