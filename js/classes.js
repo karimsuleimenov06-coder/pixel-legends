@@ -88,7 +88,29 @@ PL.CLASSES = {
       { id: 'r5', name: 'Выносливость', desc: '+15% максимум здоровья', cost: 1, requires: ['r3'], effect: { maxHp: 0.15 } },
       { id: 'r6', name: 'Охотник', desc: '+10% скорость, +10% энергия', cost: 1, requires: ['r4', 'r5'], effect: { moveSpeed: 0.1, energyMax: 0.1 } }
     ]
+  },
+
+  necromancer: {
+    id: 'necromancer', name: 'Некромант', weaponKind: 'skullStaff',
+    desc: 'Повелитель мёртвых: призывает рыцаря-нежить и усиливает себя и союзников.',
+    palette: { skin: '#d8d4c8', outfit: '#2e2240', outfitDark: '#1a1228', accent: '#6aff8a', hair: '#3a2a4e', weapon: '#ece6d4' },
+    base: { hp: 100, str: 15, def: 7, spd: 145, crit: 8, energyMax: 110, energyRegen: 13 },
+    growth: { hp: 7, str: 1.5, def: 0.7, spd: 0.4, crit: 0.18 },
+    light: { hits: 3, dmgMult: [0.8, 0.8, 1.0], range: 210, knockback: [20, 20, 40], startup: [0.13, 0.13, 0.15], active: 0.06, recovery: [0.14, 0.14, 0.22], projectile: true, projColor: '#6aff8a' },
+    heavy: { dmgMult: 1.9, range: 240, knockback: 60, startup: 0.3, active: 0.08, recovery: 0.3, projectile: true, pierce: true, projColor: '#c06aff', lifesteal: 0.15 },
+    abilities: [
+      { key: 'q', id: 'darkPact', name: 'Тёмная печать', cooldown: 14, energyCost: 30, duration: 5, telegraph: 0.12, desc: 'На 5 секунд ты и твои рыцари наносите двойной урон.' },
+      { key: 'e', id: 'raiseKnight', name: 'Призыв рыцаря', cooldown: 22, energyCost: 45, duration: 20, radius: 30, telegraph: 0.4, desc: 'Ульта: поднимает из земли рыцаря-нежить, который сражается за тебя 20 секунд.' }
+    ],
+    skillTree: [
+      { id: 'n1', name: 'Тёмная энергия', desc: '+15% урон обычных атак', cost: 1, requires: [], effect: { lightDmg: 0.15 } },
+      { id: 'n2', name: 'Костяной доспех', desc: '+15% максимального здоровья', cost: 1, requires: [], effect: { maxHp: 0.15 } },
+      { id: 'n3', name: 'Жажда душ', desc: 'Тяжёлая атака лечит вдвое сильнее', cost: 1, requires: ['n1'], effect: { lifesteal: 0.15 } },
+      { id: 'n4', name: 'Вечная печать', desc: 'Тёмная печать: -30% перезарядки', cost: 1, requires: ['n2'], effect: { abilityCdQ: -0.3 } },
+      { id: 'n5', name: 'Верный страж', desc: 'Рыцарь: +40% здоровья и урона', cost: 1, requires: ['n4'], effect: { allyPower: 0.4 } },
+      { id: 'n6', name: 'Легион', desc: 'Призыв рыцаря поднимает двух рыцарей', cost: 1, requires: ['n3', 'n5'], effect: { allyCount: 1 } }
+    ]
   }
 };
 
-PL.CLASS_LIST = ['warrior', 'mage', 'assassin', 'archer'];
+PL.CLASS_LIST = ['warrior', 'mage', 'assassin', 'archer', 'necromancer'];

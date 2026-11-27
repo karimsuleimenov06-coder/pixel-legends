@@ -190,13 +190,18 @@ PL.Enemy = class Enemy extends PL.Entity {
       return;
     }
 
+    // Normal and elite enemies fight whoever is closest: the player or a summoned ally.
+    this.retarget = (this.retarget || 0) - dt;
+    if (this.retarget <= 0 || !this.target || !this.target.alive) { this.target = this.pickTarget(player); this.retarget = 0.5; }
+    const target = this.target;
+
     if (this.action) {
-      this.updateAction(dt, player);
+      this.updateAction(dt, target);
       this.applyPhysics(dt, PL.World);
       return;
     }
 
-    const dx = player.x - this.x;
+    const dx = target.x - this.x;
     const dist = Math.abs(dx);
     this.facing = dx >= 0 ? 1 : -1;
     const range = this.cfg.range || 40;
@@ -218,6 +223,15 @@ PL.Enemy = class Enemy extends PL.Entity {
 
     if (this.onGround && Math.abs(this.vx) > 5) this.walkPhase += dt * 9;
     this.applyPhysics(dt, PL.World);
+  }
+
+  pickTarget(player) {
+    let best = player, bestD = player.alive ? Math.abs(player.x - this.x) : Infinity;
+    for (const a of PL.Allies.alive()) {
+      const d = Math.abs(a.x - this.x) + 12; // slight preference for the player
+      if (d < bestD) { bestD = d; best = a; }
+    }
+    return best;
   }
 
   startAttack(kind) {

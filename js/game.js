@@ -23,7 +23,7 @@ PL.Game = (function () {
     enemies = [];
     sessionStats = { kills: 0, xp: 0 };
     clearTriggered = false; defeatHandled = false; ending = null;
-    PL.Particles.clear(); PL.Projectiles.clear(); PL.Hazards.clear(); PL.Pickups.clear();
+    PL.Particles.clear(); PL.Projectiles.clear(); PL.Hazards.clear(); PL.Pickups.clear(); PL.Allies.clear();
     mode.init(exposed);
     player.y = PL.World.groundY;
     PL.World.camera.x = Math.max(0, player.x - PL.VIEW_W / 2);
@@ -104,6 +104,7 @@ PL.Game = (function () {
 
     player.update(dt, enemies);
     for (const e of enemies) e.update(dt, player, enemies);
+    PL.Allies.update(dt, enemies);
     PL.Projectiles.update(dt, player, enemies);
     PL.Hazards.update(dt, player);
     PL.Pickups.update(dt, player);
@@ -159,6 +160,7 @@ PL.Game = (function () {
     PL.Hazards.render(ctx, camX);
     if (player) {
       for (const e of enemies) e.render(ctx, camX);
+      PL.Allies.render(ctx, camX);
       player.render(ctx, camX);
       if (player.alive) PL.Lighting.add(player.x, player.y - 18, 72, 0.32, false);
     }

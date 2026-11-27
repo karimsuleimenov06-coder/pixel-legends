@@ -12,7 +12,8 @@ const PLAYER_ATTACK_ANIM = {
     heavy: { style: 'thrust' }, q: { style: 'thrust' }, e: { style: 'swing', from: 3.6, to: -2.4 }
   },
   mage: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'raise' } },
-  archer: { light: [{ style: 'shoot' }], heavy: { style: 'shoot' }, q: { style: 'shootUp' }, e: { style: 'shoot' } }
+  archer: { light: [{ style: 'shoot' }], heavy: { style: 'shoot' }, q: { style: 'shootUp' }, e: { style: 'shoot' } },
+  necromancer: { light: [{ style: 'cast' }], heavy: { style: 'cast' }, q: { style: 'raise' }, e: { style: 'slam' } }
 };
 
 PL.Player = class Player extends PL.Entity {
@@ -49,6 +50,7 @@ PL.Player = class Player extends PL.Entity {
     this.totalDamageTaken = 0;
     this.slowMult = 1;
     this.slowTimer = 0;
+    this.empowerTimer = 0; // Necromancer's Dark Pact: double damage for the player and summoned allies
   }
 
   applySlow(mult, duration) {
@@ -70,6 +72,10 @@ PL.Player = class Player extends PL.Entity {
     if (this.comboResetTimer > 0) { this.comboResetTimer -= dt; if (this.comboResetTimer <= 0) this.comboIndex = 0; }
     if (this.comboDisplay.timer > 0) { this.comboDisplay.timer -= dt; if (this.comboDisplay.timer <= 0) this.comboDisplay.count = 0; }
     if (this.slowTimer > 0) { this.slowTimer -= dt; if (this.slowTimer <= 0) this.slowMult = 1; }
+    if (this.empowerTimer > 0) {
+      this.empowerTimer = Math.max(0, this.empowerTimer - dt);
+      if (Math.random() < dt * 14) PL.Particles.spawnSpark(this.x + PL.U.rand(-6, 6), this.y - PL.U.rand(4, this.h), '#b06aff', 1, { maxLifeTime: 0.5, minSpeed: 10, maxSpeed: 30, gravity: -60 });
+    }
 
     if (this.state === 'hurt') {
       this.hurtTimer -= dt;
@@ -205,6 +211,7 @@ PL.Player = class Player extends PL.Entity {
     let base = this.str * mult;
     if (slot === 'light') base *= this.computed.lightDmgMult;
     else if (slot === 'heavy') base *= this.computed.heavyDmgMult;
+    if (this.empowerTimer > 0) base *= 2;
     const isCrit = PL.U.rollCrit(this.crit);
     if (isCrit) base *= 1.8;
     return { dmg: base, isCrit };
@@ -249,7 +256,8 @@ PL.Player = class Player extends PL.Entity {
       PL.Projectiles.spawn({
         x: this.x + this.facing * 22, y: this.y - this.h * 0.58, vx: this.facing * speed, vy: 0, gravity: 0,
         w: 10, h: 6, color: def.projColor || '#fff', owner: 'player', pierce: !!def.pierce, kind: this.classDef.weaponKind === 'bow' ? 'arrow' : 'orb',
-        damage: dmg, isCrit, knockback: kb, facing: this.facing
+        damage: dmg, isCrit, knockback: kb, facing: this.facing,
+        onHit: def.lifesteal ? (final) => this.heal(final * (def.lifesteal + (this.computed.lifestealBonus || 0))) : null
       });
       (this.classDef.weaponKind === 'bow' ? PL.Audio.sfx.bow : PL.Audio.sfx.magicCast)();
       this.registerCombo();
@@ -260,6 +268,17 @@ PL.Player = class Player extends PL.Entity {
     if (any) { (isLight ? PL.Audio.sfx.hit : PL.Audio.sfx.hitHeavy)(); this.registerCombo(); }
     else (isLight ? PL.Audio.sfx.swingLight : PL.Audio.sfx.swingHeavy)();
     PL.Particles.spawnSlash(this.x + this.facing * 3, this.y - this.h * 0.62, this.facing, isLight ? '#c8d4e4' : '#ffb13b', isLight ? 20 : 25);
+  }
+
+  heal(amount) {
+    if (!this.alive || amount <= 0) return;
+    const before = this.hp;
+    this.hp = Math.min(this.maxHp, this.hp + amount);
+    const got = Math.round(this.hp - before);
+    if (got > 0) {
+      PL.Particles.spawnFloatText(this.x + PL.U.rand(-6, 6), this.y - this.h - 10, '+' + got, '#6aff8a');
+      PL.Particles.spawnSpark(this.x, this.y - this.h * 0.5, '#6aff8a', 5, { maxLifeTime: 0.4, minSpeed: 20, maxSpeed: 70 });
+    }
   }
 
   tryAbility(slot) {
@@ -289,6 +308,7 @@ PL.Player = class Player extends PL.Entity {
       case 'shockwave': return { x: this.x + this.facing * radius * 0.4, y: this.y, radius };
       case 'fireStorm': return { x: this.x + this.facing * 90, y: this.y, radius };
       case 'arrowRain': return { x: this.x + this.facing * 160, y: this.y, radius };
+      case 'raiseKnight': return { x: this.x + this.facing * 30, y: this.y, radius };
       default: return { x: this.x, y: this.y, radius };
     }
   }
@@ -366,6 +386,21 @@ PL.Player = class Player extends PL.Entity {
         PL.Audio.sfx.bow();
         break;
       }
+      case 'darkPact': {
+        this.empowerTimer = def.duration || 5;
+        PL.Particles.spawnExplosion(this.x, this.y - this.h * 0.5, 50, '#b06aff');
+        for (const al of PL.Allies.alive()) PL.Particles.spawnBurst(al.x, al.y - al.h * 0.5, '#b06aff', 12, 120);
+        PL.Particles.spawnFloatText(this.x, this.y - this.h - 14, 'УРОН x2', '#d08aff', true);
+        PL.Audio.sfx.magicCast();
+        break;
+      }
+      case 'raiseKnight': {
+        PL.Allies.summon(this, this.computed.allyCount || 1, { duration: def.duration || 20, power: this.computed.allyPower || 1 });
+        PL.Particles.spawnExplosion(preview.x, this.y - 4, 40, '#6aff8a');
+        PL.World.camera.shake(6, 0.25);
+        PL.Audio.sfx.bossRoar();
+        break;
+      }
       case 'aimedShot': {
         const base = this.str * dmgMultFinal;
         const isCrit = PL.U.rollCrit(this.crit + 35);
@@ -435,7 +470,9 @@ PL.Player = class Player extends PL.Entity {
       PL.CharSprites.draw(ctx, this.classId, cx - this.facing * 8, groundY, this.facing, pose, false);
       ctx.globalAlpha = 1;
     }
-    if (!blink) PL.CharSprites.draw(ctx, this.classId, cx, groundY, this.facing, pose, this.hitFlash > 0);
+    const pactFlash = this.empowerTimer > 0 && Math.floor(this.animTime * 6) % 3 === 0 ? '#b06aff' : false;
+    if (!blink) PL.CharSprites.draw(ctx, this.classId, cx, groundY, this.facing, pose, this.hitFlash > 0 || pactFlash);
+    if (this.empowerTimer > 0) PL.Lighting.add(this.x, this.y - this.h * 0.5, 50, 0.35, false, '#b06aff');
     PL.Rig.drawNameTag(ctx, cx, groundY, PL.CharSprites.height(this.classId) + 3, this.classDef.name, this.classDef.palette.accent);
     this.renderTelegraph(ctx, camX, groundY);
   }

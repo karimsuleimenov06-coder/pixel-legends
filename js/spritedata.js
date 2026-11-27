@@ -161,6 +161,19 @@ window.PL = window.PL || {};
       pal: Object.assign({ H: '#3a6a2e', h: '#24461c', Y: '#4e8a3e', d: '#1a2a14', A: '#6a4a2a', a: '#4a3018', L: '#8a6a3e', B: '#a8723e', b: '#5a3a1e', G: '#c8a040' }, SKIN, { E: '#2a4a1a' }),
       limbs: limbs('#3a6a2e', '#e6c29a', '#4a3a26', '#5a3a1e')
     },
+    necromancer: {
+      head: HEAD_HOOD, headOver: [{ dx: 4, dy: 6, rows: ['.TTTT.', 'TdTTdT', '.TTTT.'] }], torso: TORSO_ROBE, torsoAbove: 12, weapon: 'skullStaff',
+      back: { type: 'cape', color: '#241834', len: 8 },
+      pal: { H: '#3a2a4e', h: '#22182e', Y: '#54406e', d: '#08050c', S: '#d8d4c8', s: '#a8a498', e: '#b0ffc0', E: '#6aff8a', T: '#ece6d4', A: '#3e2a5a', a: '#24183a', L: '#5a3e82', B: '#d8d0b8', G: '#6aff8a' },
+      limbs: limbs('#3e2a5a', '#d8d4c8', '#24183a', '#0e0a14')
+    },
+    death_knight: {
+      head: HEAD_HELM_CLOSED, headOver: [HORNS], torso: TORSO_PLATE, weapon: 'sword', legThick: 4, armThick: 3, hipSpread: 3,
+      back: { type: 'cape', color: '#1a3a26', len: 6 },
+      weaponPal: { W: '#c8ffd8', M: '#8ad8a0', m: '#3a7a50', G: '#6a5a7a', g: '#3a2e4a' },
+      pal: { M: '#4a5058', m: '#2a2e36', W: '#6a727c', d: '#06080a', E: '#6aff8a', k: '#c8c0a8', R: '#2a6a3e', r: '#18402a', B: '#1a1e24', b: '#6aff8a' },
+      limbs: limbs('#4a5058', '#2a2e36', '#363a42', '#1a1e24')
+    },
 
     // ======== Normal enemies ========
     goblin_grunt: {

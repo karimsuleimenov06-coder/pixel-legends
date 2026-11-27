@@ -39,7 +39,8 @@ PL.Projectiles = (function () {
             e.takeDamage(final, { knockback: p.knockback, knockUp: -160, fromRight: p.vx < 0 });
             PL.Particles.hitNumber(e.x, e.y - e.h - 6, final, p.isCrit);
             PL.Particles.spawnBurst(p.x, p.y, p.color, 6, 90);
-            if (PL.Game && PL.Game.player) PL.Game.player.registerCombo();
+            if (p.onHit) p.onHit(final, e);
+            if (PL.Game && PL.Game.player) { PL.Game.player.registerCombo(); PL.Game.player.totalDamageDealt += final; }
             p.hitSet.add(e);
             if (!p.pierce) return false;
           }
@@ -53,6 +54,15 @@ PL.Projectiles = (function () {
           if (p.statusEffect && p.statusEffect.type === 'slow' && player.applySlow) {
             player.applySlow(p.statusEffect.mult, p.statusEffect.duration);
           }
+          return false;
+        }
+        // Summoned allies block enemy shots too.
+        for (const al of PL.Allies.alive()) {
+          if (al.isInvuln() || !PL.U.aabbOverlap(pr, al.rect())) continue;
+          const final = PL.U.mitigate(p.damage, al.def || 0);
+          al.takeDamage(final, { knockback: p.knockback * 0.5, knockUp: -100, fromRight: p.vx < 0 });
+          PL.Particles.hitNumber(al.x, al.y - al.h - 6, final, false);
+          PL.Particles.spawnBurst(p.x, p.y, p.color, 6, 90);
           return false;
         }
       }

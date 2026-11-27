@@ -14,7 +14,7 @@ PL.UI = (function () {
   // ---------------- Pixel icons ----------------
   const ICON_PAL = {
     O: '#ff8a2a', Y: '#ffd04a', W: '#ffffff', G: '#6a5a48', g: '#4a3e30', R: '#e8302a', C: '#6ad9ff',
-    P: '#b04aff', I: '#a8723e', H: '#ffb0a0', B: '#3a8ae8', b: '#c8ecff', M: '#9aa4b2', h: '#8a5a30', w: '#e8e4d8'
+    P: '#b04aff', I: '#a8723e', H: '#ffb0a0', B: '#3a8ae8', b: '#c8ecff', M: '#9aa4b2', h: '#8a5a30', w: '#e8e4d8', L: '#6aff8a', d: '#2a2030'
   };
   const ICONS = {
     heart: ['.RR...RR.', 'RHRR.RRRR', 'RHRRRRRRR', 'RRRRRRRRR', '.RRRRRRR.', '..RRRRR..', '...RRR...', '....R....'],
@@ -33,6 +33,9 @@ PL.UI = (function () {
     heavy: ['.....WW.....', '.....MW.....', '.....MW.....', '.....MW.....', '.....MW.....', '...GGGGGG...', '.....hh.....', '.....hh.....', '............', '.Y.O.YY.O.Y.', '..OYOYYOYO..', 'GGGGGGGGGGGG'],
     jump: ['.....WW.....', '....WWWW....', '...WWWWWW...', '..WWWWWWWW..', '.WWWWWWWWWW.', '....WWWW....', '....WWWW....', '....WWWW....', '....WWWW....', '............', '.GGGGGGGGGG.', '.gggggggggg.'],
     dodge: ['............', '.......W....', '.......WW...', 'C.CC.WWWWW..', '.....WWWWWW.', 'C.CC.WWWWW..', '.......WW...', '.......W....', '............', '..C.C.CC....', '............', '............'],
+    darkPact: ['....PPPP....', '..PP....PP..', '.P..P..P..P.', '.P...PP...P.', 'P..P.WW.P..P', 'P...WLLW...P', 'P...WLLW...P', 'P..P.WW.P..P', '.P...PP...P.', '.P..P..P..P.', '..PP....PP..', '....PPPP....'],
+    raiseKnight: ['....MMMM....', '...MMMMMM...', '...MLMMLM...', '...MMMMMM...', '....MMMM....', '..MMMMMMMM..', '.MM.MMMM.MM.', '....MMMM....', '....M..M....', '.L.LM.LM.L..', 'LLLLLLLLLLLL', 'gggggggggggg'],
+    atkSkull: ['........wwww', '.......wwwww', '.......wLwLw', '.......wwwww', '........wdw.', '.......h....', '......h.....', '.....h......', '....h.......', '...h........', '..h.........', '.h..........'],
     aimedShot: ['.....RR.....', '.....RR.....', '...RRRRRR...', '..R..RR..R..', '.R...RR...R.', 'RRRRRWWRRRRR', 'RRRRRWWRRRRR', '.R...RR...R.', '..R..RR..R..', '...RRRRRR...', '.....RR.....', '.....RR.....']
   };
   function icon(name) {
@@ -63,7 +66,7 @@ PL.UI = (function () {
       slot.title = ab.name;
       setTouchIcon(ab.key, ab.id);
     }
-    const ATTACK_ICON = { greatsword: 'atkSword', staff: 'atkStaff', dagger: 'atkDagger', bow: 'atkBow' };
+    const ATTACK_ICON = { greatsword: 'atkSword', staff: 'atkStaff', dagger: 'atkDagger', bow: 'atkBow', skullStaff: 'atkSkull' };
     setTouchIcon('light', ATTACK_ICON[PL.CLASSES[classId].weaponKind] || 'atkSword');
     setTouchIcon('heavy', 'heavy');
     setTouchIcon('jump', 'jump');
