@@ -30,8 +30,8 @@
       <button class="btn" data-action="go-stats">Статистика</button>
       <button class="btn" data-action="fullscreen" id="btn-fullscreen">На весь экран</button>
       <div class="fs-hint hidden" id="fs-hint">На iPhone: «Поделиться» → «На экран Домой», затем запускай игру с иконки — она откроется на весь экран.</div>
-      <button class="btn" data-action="wipe-save">Сбросить прогресс</button>
     </div>
+    <button class="btn-wipe" data-action="wipe-save">Сбросить прогресс</button>
     <div class="version-tag">v1.1</div>
   </div>
 
@@ -166,6 +166,18 @@
     <div class="menu-buttons">
       <button class="btn btn-primary" data-action="retry-run">Повторить</button>
       <button class="btn" data-action="quit-to-menu">В меню</button>
+    </div>
+  </div>
+
+  <!-- ===================== CONFIRM DIALOG ===================== -->
+  <div id="confirm-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-box">
+      <h2 class="confirm-title" id="confirm-title">Вы уверены?</h2>
+      <div class="confirm-text" id="confirm-text"></div>
+      <div class="confirm-buttons">
+        <button class="btn btn-primary" id="confirm-cancel">Отмена</button>
+        <button class="btn btn-danger" id="confirm-ok">Удалить</button>
+      </div>
     </div>
   </div>
 

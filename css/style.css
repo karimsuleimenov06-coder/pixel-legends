@@ -360,3 +360,49 @@ canvas.sprite, .icon { image-rendering: pixelated; image-rendering: crisp-edges;
 
 .btn-danger { background: #8a1e1e; color: #ffd8d0; }
 .fs-hint { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.35; text-shadow: 2px 2px 0 var(--edge); }
+
+/* ---------- Reset button: small, separate from the main menu actions ---------- */
+.btn-wipe {
+  font-family: inherit; font-size: 15px; font-weight: 700; letter-spacing: 1px;
+  background: transparent; border: none; cursor: pointer; padding: 6px 10px;
+  color: #c87a70; text-decoration: underline; text-underline-offset: 3px;
+  text-shadow: 2px 2px 0 var(--edge);
+  position: absolute; left: 12px; bottom: 6px;
+}
+.btn-wipe:hover { color: #ff9a8a; }
+
+/* ---------- Confirmation dialog ---------- */
+#confirm-modal {
+  position: absolute; inset: 0; z-index: 90;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(2, 3, 10, 0.78); padding: 16px;
+}
+.confirm-box {
+  width: min(460px, 100%); max-height: 100%; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 22px 20px 20px;
+  background: var(--panel);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge), 0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge), var(--px) 0 0 0 var(--edge),
+    inset 0 var(--px) 0 0 #c84a3a, inset 0 calc(-1 * var(--px)) 0 0 #4a1010;
+}
+.confirm-title { font-family: 'Press Start 2P', monospace; font-size: clamp(16px, 3vw, 24px); color: #ff7a6a; margin: 0; text-align: center;
+  text-shadow: 2px 0 0 var(--edge), -2px 0 0 var(--edge), 0 2px 0 var(--edge), 0 -2px 0 var(--edge); }
+.confirm-text { font-size: 16px; line-height: 1.4; color: var(--text); text-align: center; text-shadow: 2px 2px 0 var(--edge); }
+.confirm-text b { color: var(--gold); }
+.confirm-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; width: 100%; }
+.confirm-buttons .btn { flex: 1 1 150px; }
+.btn-danger:disabled { opacity: 0.45; }
+@media (hover: none), (pointer: coarse) {
+  .confirm-box { padding: 14px 14px 14px; gap: 10px; }
+  .confirm-text { font-size: 14px; }
+  .confirm-buttons .btn { font-size: 16px; padding: 8px 14px; }
+}
+.confirm-buttons .btn-danger, .confirm-buttons .btn-danger:hover {
+  background: #8a1e1e; color: #ffd8d0;
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--edge), 0 var(--px) 0 0 var(--edge),
+    calc(-1 * var(--px)) 0 0 0 var(--edge), var(--px) 0 0 0 var(--edge),
+    inset 0 var(--px) 0 0 #d04a3a, inset 0 calc(-1 * var(--px)) 0 0 #4a0a0a;
+}
+.confirm-buttons .btn-danger:not(:disabled):hover { background: #a82a22; color: #fff; }

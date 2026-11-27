@@ -378,18 +378,59 @@ PL.UI = (function () {
     showScreen('defeat');
   }
 
-  // Two-step reset built into the button (browser confirm() dialogs are blocked in embedded viewers).
-  function confirmWipe(btn) {
-    if (btn.dataset.armed) {
-      PL.Save.wipe();
-      location.reload();
-      return;
+  // ---------------- Confirmation dialog ----------------
+  // In-page modal (browser confirm() is blocked in embedded viewers and looks out of place).
+  // The dangerous button stays disabled for a moment so a double tap cannot confirm by accident.
+  let confirmState = null;
+  function openConfirm(opts) {
+    const modal = el('confirm-modal'), ok = el('confirm-ok'), cancel = el('confirm-cancel');
+    el('confirm-title').textContent = opts.title || 'Вы уверены?';
+    el('confirm-text').innerHTML = opts.html || '';
+    ok.textContent = opts.okLabel || 'Да';
+    cancel.textContent = opts.cancelLabel || 'Отмена';
+    ok.disabled = true;
+    confirmState = { onConfirm: opts.onConfirm, armTimer: setTimeout(() => { ok.disabled = false; }, opts.armDelay == null ? 700 : opts.armDelay) };
+    modal.classList.remove('hidden');
+    cancel.focus();
+  }
+  function closeConfirm(confirmed) {
+    if (!confirmState) return;
+    const st = confirmState;
+    confirmState = null;
+    clearTimeout(st.armTimer);
+    el('confirm-modal').classList.add('hidden');
+    if (confirmed && st.onConfirm) st.onConfirm();
+  }
+  function setupConfirm() {
+    el('confirm-ok').addEventListener('click', () => { if (!el('confirm-ok').disabled) { PL.Audio.sfx.uiClick(); closeConfirm(true); } });
+    el('confirm-cancel').addEventListener('click', () => { PL.Audio.sfx.uiClick(); closeConfirm(false); });
+    el('confirm-modal').addEventListener('click', (e) => { if (e.target.id === 'confirm-modal') closeConfirm(false); });
+    window.addEventListener('keydown', (e) => {
+      if (!confirmState) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeConfirm(false); }
+      e.stopPropagation();
+    }, true);
+  }
+
+  function progressSummary() {
+    const parts = [];
+    for (const id of PL.CLASS_LIST) {
+      const p = PL.Save.getClassProfile(id);
+      if (p && (p.level > 1 || p.xp > 0)) parts.push(`${PL.CLASSES[id].name} — ур. ${p.level}`);
     }
-    btn.dataset.armed = '1';
-    const original = btn.textContent;
-    btn.textContent = 'Точно? Нажми ещё раз';
-    btn.classList.add('btn-danger');
-    setTimeout(() => { delete btn.dataset.armed; btn.textContent = original; btn.classList.remove('btn-danger'); }, 3000);
+    return parts;
+  }
+
+  function confirmWipe() {
+    const parts = progressSummary();
+    const what = parts.length ? `<br><br>Сейчас сохранено: <b>${parts.join(', ')}</b>.` : '';
+    openConfirm({
+      title: 'Вы уверены?',
+      html: `Будет удалён <b>весь прогресс</b>: уровни, опыт, очки характеристик, навыки и статистика всех классов.${what}<br><br>Отменить это будет нельзя.`,
+      okLabel: 'Да, удалить',
+      cancelLabel: 'Отмена',
+      onConfirm: () => { PL.Save.wipe(); location.reload(); }
+    });
   }
 
   // ---------------- Action delegation ----------------
@@ -407,7 +448,7 @@ PL.UI = (function () {
         case 'fullscreen': enterFullscreen(); break;
         case 'go-skilltree': renderSkillTree(); showScreen('skilltree'); break;
         case 'go-back-from-skilltree': showScreen('mode'); break;
-        case 'wipe-save': confirmWipe(btn); break;
+        case 'wipe-save': confirmWipe(); break;
         case 'pause-game': PL.Game.pause(); showScreen('pause'); break;
         case 'resume-game': showScreen(null); showHud(true); PL.Game.resume(); break;
         case 'quit-to-menu': PL.Game.stop(); showHud(false); showScreen('menu'); break;
@@ -423,6 +464,7 @@ PL.UI = (function () {
     document.querySelector('.nrg-bar').insertBefore(icon('star'), document.querySelector('.nrg-bar').firstChild);
     buildClassCards();
     setupFullscreenButton();
+    setupConfirm();
     bindActions();
     PL.Input.initTouch();
   }
