@@ -55,6 +55,7 @@ PL.Player = class Player extends PL.Entity {
     this.totalDamageTaken = 0;
     this.slowMult = 1;
     this.slowTimer = 0;
+    this.lungeTimer = 0;   // dash-strike heavy attack movement
     this.empowerTimer = 0; // Necromancer's Dark Pact: double damage for the player and summoned allies
     this.regenTimer = 0; this.regenRate = 0; this.regenAcc = 0; // Cleric's Healing Light heal-over-time
     this.guardTimer = 0; this.guardReduction = 0;                // Guardian's Shield Wall
@@ -113,6 +114,12 @@ PL.Player = class Player extends PL.Entity {
       if (moveAxis !== 0) this.facing = moveAxis > 0 ? 1 : -1;
     } else if (this.state !== 'dodge') {
       this.vx = PL.U.approach(this.vx, 0, this.spd * 7 * dt);
+    }
+    // Dash strike (assassin heavy): lunge forward during the wind-up so the blow lands at the end of the dash.
+    if (this.lungeTimer > 0) {
+      this.lungeTimer -= dt;
+      this.vx = this.facing * 430;
+      if (Math.random() < 0.5) PL.Particles.spawnDust(this.x, this.y, -this.facing);
     }
     if (this.onGround && Math.abs(this.vx) > 5 && this.state !== 'dodge') this.runCyclePhase += dt * 11;
     else if (Math.abs(this.vx) <= 5) this.runCyclePhase = 0;
@@ -202,12 +209,13 @@ PL.Player = class Player extends PL.Entity {
       const def = this.classDef.heavy;
       this.action = { type: 'heavy', startup: def.startup, active: def.active, recovery: def.recovery, t: 0, phase: 'startup', locked: true, hasHit: false, def };
       this.comboIndex = 0;
+      if (def.dashStrike) { this.lungeTimer = def.startup; PL.Audio.sfx.dash(); }
     }
   }
 
   startDodge() {
     this.state = 'dodge';
-    this.action = null; this.queuedAction = null;
+    this.action = null; this.queuedAction = null; this.lungeTimer = 0;
     const axis = PL.Input.getMoveAxis();
     const dir = axis !== 0 ? Math.sign(axis) : this.facing;
     this.facing = dir;
@@ -528,7 +536,7 @@ PL.Player = class Player extends PL.Entity {
     if (applied) {
       this.totalDamageTaken += amount;
       if (this.alive) {
-        this.state = 'hurt'; this.hurtTimer = 0.26; this.action = null; this.queuedAction = null; this.comboIndex = 0;
+        this.state = 'hurt'; this.hurtTimer = 0.26; this.action = null; this.queuedAction = null; this.comboIndex = 0; this.lungeTimer = 0;
         this.invulnTimer = Math.max(this.invulnTimer, 0.5); // brief mercy invulnerability (blinks) so bursts can't chain-hit
         PL.Audio.sfx.hurt();
         PL.Particles.spawnSpark(this.x, this.y - this.h * 0.6, '#ff5050', 8, { maxLifeTime: 0.3 });
