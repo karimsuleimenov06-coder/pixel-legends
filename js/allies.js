@@ -10,12 +10,12 @@ PL.Ally = class Ally extends PL.Entity {
     this.owner = owner;
     this.slot = opts.slot || 0;
     this.power = opts.power || 1;
-    this.maxHp = Math.round(owner.maxHp * 0.7 * this.power);
+    this.maxHp = Math.round(owner.maxHp * 0.55 * this.power);
     this.hp = this.maxHp;
     this.def = owner.def;
     this.spd = 150;
     this.range = 30;
-    this.lifeMax = opts.duration || 20;
+    this.lifeMax = opts.duration || 15;
     this.life = this.lifeMax;
     this.rise = 0.55;          // summoning animation: rises out of the ground, cannot act or be hit
     this.atkTimer = 0.2;
@@ -122,10 +122,10 @@ PL.Ally = class Ally extends PL.Entity {
     for (const e of enemies) {
       if (!e.alive || !PL.U.aabbOverlap(hb, e.rect())) continue;
       const isCrit = PL.U.rollCrit(this.owner.crit * 0.5);
-      let dmg = this.owner.str * 0.9 * this.power * this.damageMult();
+      let dmg = this.owner.str * 0.65 * this.power * this.damageMult();
       if (isCrit) dmg *= 1.8;
       const final = PL.U.mitigate(dmg, e.def || 0);
-      e.takeDamage(final, { knockback: 120, knockUp: -140, fromRight: this.facing < 0 });
+      e.takeDamage(final, { knockback: 90, knockUp: -110, fromRight: this.facing < 0, fromAlly: true });
       this.owner.totalDamageDealt += final;
       PL.Particles.hitNumber(e.x, e.y - e.h - 6, final, isCrit);
       any = true;

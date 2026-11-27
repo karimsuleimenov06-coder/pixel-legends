@@ -395,7 +395,7 @@ PL.Player = class Player extends PL.Entity {
         break;
       }
       case 'raiseKnight': {
-        PL.Allies.summon(this, this.computed.allyCount || 1, { duration: def.duration || 20, power: this.computed.allyPower || 1 });
+        PL.Allies.summon(this, this.computed.allyCount || 1, { duration: def.duration || 15, power: this.computed.allyPower || 1 });
         PL.Particles.spawnExplosion(preview.x, this.y - 4, 40, '#6aff8a');
         PL.World.camera.shake(6, 0.25);
         PL.Audio.sfx.bossRoar();

@@ -106,10 +106,36 @@ PL.Enemy = class Enemy extends PL.Entity {
       if (this.hp <= 0) { this.hp = 0; this.alive = false; this.die(); }
       return true;
     }
+    opts = opts || {};
+    if (this.isBoss) return this.takeBossDamage(amount, opts);
+    // Summoned allies chip damage but cannot stun-lock or juggle elites.
+    const tough = this.isElite && opts.fromAlly;
+    if (tough) opts = Object.assign({}, opts, { knockback: 0 });
     const applied = super.takeDamage(amount, opts);
-    if (applied && this.alive) {
+    if (applied && this.alive && !tough) {
       this.hurtTimer = 0.18;
       if (this.action && !this.action.lockedThroughHurt) this.action = null;
+    }
+    return applied;
+  }
+
+  // Bosses have poise: hits never cancel an attack in progress. Only a burst of player damage
+  // (12% of max HP within ~3s) staggers an idle boss briefly, at most once every 6 seconds.
+  takeBossDamage(amount, opts) {
+    // Only a small shove from player hits (knockUp -1 keeps the boss on the ground); allies don't move it at all.
+    const o = Object.assign({}, opts, { knockback: opts.fromAlly ? 0 : (opts.knockback || 0) * 0.2, knockUp: -1 });
+    const applied = PL.Entity.prototype.takeDamage.call(this, amount, o);
+    if (!applied || !this.alive) return applied;
+    const now = this.animTime;
+    if (!opts.fromAlly) {
+      this.poiseLog = (this.poiseLog || []).filter(h => now - h.t < 3);
+      this.poiseLog.push({ t: now, d: amount });
+      const burst = this.poiseLog.reduce((a, h) => a + h.d, 0);
+      if (burst >= this.maxHp * 0.12 && !this.action && now - (this.lastStagger || -99) > 6) {
+        this.lastStagger = now; this.poiseLog = [];
+        this.hurtTimer = 0.5;
+        PL.Particles.spawnFloatText(this.x, this.y - this.h - 10, 'ОШЕЛОМЛЁН', '#ffd04a', true);
+      }
     }
     return applied;
   }
@@ -417,8 +443,16 @@ PL.Boss = class Boss extends PL.Enemy {
     this.decisionTimer -= dt;
     if (this.decisionTimer <= 0) {
       this.decisionTimer = 0.4;
-      const ready = this.currentPhase().attacks.filter(id => this.atkCooldowns[id] <= 0 && id !== this.lastAttackId);
-      const pool = ready.length ? ready : this.currentPhase().attacks.filter(id => this.atkCooldowns[id] <= 0);
+      // Close-range attacks are only picked when the player is actually within their reach.
+      const reach = (id) => {
+        const P = PL.ATTACK_PATTERNS[id] || {};
+        if (id === 'meleeSwing' || id === 'coneBreath') return (P.range || 70) + 6;
+        if (id === 'aoeSlam' || id === 'cloneSwap') return (P.radius || 90) + 6;
+        return Infinity;
+      };
+      const usable = this.currentPhase().attacks.filter(id => this.atkCooldowns[id] <= 0 && dist <= reach(id));
+      const ready = usable.filter(id => id !== this.lastAttackId);
+      const pool = ready.length ? ready : usable;
       if (pool.length && dist < 420) {
         const id = PL.U.choose(pool);
         this.startBossAttack(id);
@@ -426,7 +460,8 @@ PL.Boss = class Boss extends PL.Enemy {
     }
 
     if (!this.action) {
-      if (dist > 95) this.vx = this.facing * this.spd * 0.6;
+      // Close in to melee reach (the swing hitbox starts at the boss's centre and reaches ~70px).
+      if (dist > 52) this.vx = this.facing * this.spd * 0.6;
       else this.vx = 0;
     }
     if (this.onGround && Math.abs(this.vx) > 5) this.walkPhase += dt * 7;
@@ -475,6 +510,14 @@ PL.Boss = class Boss extends PL.Enemy {
     PL.Particles.hitNumber(player.x, player.y - player.h - 6, final, false);
   }
 
+  // Applies a boss hitbox to the player and to any summoned allies standing in it. Returns true if the player was hit.
+  hitTargets(hb, player, p, fromRight) {
+    const opts = { knockback: p.knockback, knockUp: p.knockUp, fromRight };
+    for (const al of PL.Allies.alive()) if (PL.U.aabbOverlap(hb, al.rect())) this.dealBossDamage(al, p.dmgMult * 1.2, opts);
+    if (PL.U.aabbOverlap(hb, player.rect())) { this.dealBossDamage(player, p.dmgMult, opts); return true; }
+    return false;
+  }
+
   executeBossAttackTick(a, player) {
     const p = a.pattern;
     const fromRight = this.facing < 0;
@@ -482,10 +525,7 @@ PL.Boss = class Boss extends PL.Enemy {
       case 'meleeSwing': {
         if (a.hasHit) return;
         const hb = this.bossHitbox(p.range);
-        if (PL.U.aabbOverlap(hb, player.rect())) {
-          this.dealBossDamage(player, p.dmgMult, { knockback: p.knockback, knockUp: p.knockUp, fromRight });
-          PL.Audio.sfx.hitHeavy();
-        }
+        if (this.hitTargets(hb, player, p, fromRight)) PL.Audio.sfx.hitHeavy();
         PL.Particles.spawnSlash(this.x + this.facing * 4, this.y - this.h * 0.62, this.facing, '#ff8a3b', Math.round(this.h * 0.6));
         a.hasHit = true;
         break;
@@ -493,7 +533,7 @@ PL.Boss = class Boss extends PL.Enemy {
       case 'aoeSlam': case 'cloneSwap': {
         if (a.hasHit) return;
         const hb = this.bossHitbox(p.radius || 90);
-        if (PL.U.aabbOverlap(hb, player.rect())) this.dealBossDamage(player, p.dmgMult, { knockback: p.knockback, knockUp: p.knockUp, fromRight });
+        this.hitTargets(hb, player, p, fromRight);
         PL.Particles.spawnExplosion(this.x, this.y - 20, p.radius || 90, '#ff8a3b');
         PL.World.camera.shake(10, 0.25);
         PL.Audio.sfx.hitHeavy();
@@ -504,6 +544,8 @@ PL.Boss = class Boss extends PL.Enemy {
         this.vx = this.facing * p.speed;
         if (!a.hasHit) {
           const hb = this.bossHitbox(this.w + 20);
+          a.allyHits = a.allyHits || new Set();
+          for (const al of PL.Allies.alive()) if (!a.allyHits.has(al) && PL.U.aabbOverlap(hb, al.rect())) { a.allyHits.add(al); this.dealBossDamage(al, p.dmgMult * 1.2, { knockback: p.knockback, knockUp: p.knockUp, fromRight }); }
           if (PL.U.aabbOverlap(hb, player.rect())) { this.dealBossDamage(player, p.dmgMult, { knockback: p.knockback, knockUp: p.knockUp, fromRight }); a.hasHit = true; PL.Audio.sfx.hitHeavy(); }
         }
         break;
@@ -550,7 +592,7 @@ PL.Boss = class Boss extends PL.Enemy {
         if (a.t >= tickDur * (a.tickCount + 1)) {
           a.tickCount++;
           const hb = this.bossHitbox(p.range);
-          if (PL.U.aabbOverlap(hb, player.rect())) this.dealBossDamage(player, p.dmgMult, { knockback: p.knockback, knockUp: p.knockUp, fromRight });
+          this.hitTargets(hb, player, p, fromRight);
           PL.Particles.spawnBurst(this.x + this.facing * 60, this.y - 30, '#ff8a3b', 6, 100);
         }
         break;
@@ -559,7 +601,7 @@ PL.Boss = class Boss extends PL.Enemy {
         if (a.hasHit) return;
         PL.World.camera.shake(20, 0.5);
         const hb = this.bossHitbox(9999);
-        if (PL.U.aabbOverlap(hb, player.rect())) this.dealBossDamage(player, p.dmgMult, { knockback: p.knockback, knockUp: p.knockUp, fromRight });
+        this.hitTargets(hb, player, p, fromRight);
         PL.Particles.spawnExplosion(this.x + this.facing * 150, this.y - 30, 200, '#ffe070');
         PL.Audio.sfx.explosion();
         a.hasHit = true;
