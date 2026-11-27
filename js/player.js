@@ -314,8 +314,7 @@ PL.Player = class Player extends PL.Entity {
         onHit: def.lifesteal ? (final) => this.heal(final * (def.lifesteal + (this.computed.lifestealBonus || 0))) : null
       });
       (this.classDef.weaponKind === 'bow' ? PL.Audio.sfx.bow : PL.Audio.sfx.magicCast)();
-      this.registerCombo();
-      return;
+      return; // the combo counts only when the projectile actually hits (see projectile.js)
     }
     const hb = this.meleeHitbox(def.range);
     const any = this.hitAllIn(hb, mult, slot, { knockback: kb, knockUp: isLight ? -120 : -240, fromRight, stun: isLight ? 0 : def.stun });
