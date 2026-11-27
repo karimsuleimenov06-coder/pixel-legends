@@ -421,6 +421,7 @@ PL.Player = class Player extends PL.Entity {
       this.totalDamageTaken += amount;
       if (this.alive) {
         this.state = 'hurt'; this.hurtTimer = 0.26; this.action = null; this.queuedAction = null; this.comboIndex = 0;
+        this.invulnTimer = Math.max(this.invulnTimer, 0.5); // brief mercy invulnerability (blinks) so bursts can't chain-hit
         PL.Audio.sfx.hurt();
         PL.Particles.spawnSpark(this.x, this.y - this.h * 0.6, '#ff5050', 8, { maxLifeTime: 0.3 });
       } else {

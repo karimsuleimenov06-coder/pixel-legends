@@ -35,21 +35,21 @@ PL.ELITE_DEFS = [
 
 PL.BOSS_DEFS = [
   {
-    id: 'bone_king', name: 'Король Костей', projColor: '#e8e2d0', hp: 950, dmg: 15, def: 8, spd: 68, xp: 400, arena: 'crypt',
+    id: 'bone_king', name: 'Король Костей', projColor: '#e8e2d0', hp: 950, dmg: 12, def: 8, spd: 68, xp: 400, arena: 'crypt',
     phases: [
       { hpFrac: 1.0, spdMult: 1, dmgMult: 1, attacks: ['meleeSwing', 'groundSpikes'] },
       { hpFrac: 0.5, spdMult: 1.12, dmgMult: 1.15, attacks: ['meleeSwing', 'groundSpikes', 'summonAdds'] }
     ]
   },
   {
-    id: 'fire_golem', name: 'Огненный Голем', projColor: '#ff6a1a', hp: 1150, dmg: 19, def: 10, spd: 52, xp: 460, arena: 'volcanic',
+    id: 'fire_golem', name: 'Огненный Голем', projColor: '#ff6a1a', hp: 1150, dmg: 15, def: 10, spd: 52, xp: 460, arena: 'volcanic',
     phases: [
       { hpFrac: 1.0, spdMult: 1, dmgMult: 1, attacks: ['aoeSlam', 'dashCharge'] },
       { hpFrac: 0.4, spdMult: 1.3, dmgMult: 1.2, attacks: ['aoeSlam', 'dashCharge', 'groundSpikes'] }
     ]
   },
   {
-    id: 'shadow_queen', name: 'Королева Теней', hp: 820, dmg: 16, def: 6, spd: 105, xp: 440, arena: 'voidrealm',
+    id: 'shadow_queen', name: 'Королева Теней', hp: 820, dmg: 13, def: 6, spd: 105, xp: 440, arena: 'voidrealm',
     projColor: '#d02fff',
     phases: [
       { hpFrac: 1.0, spdMult: 1, dmgMult: 1, attacks: ['meleeSwing', 'projectileBarrage'] },
@@ -57,7 +57,7 @@ PL.BOSS_DEFS = [
     ]
   },
   {
-    id: 'ancient_dragon', name: 'Древний Дракон', projColor: '#ff8a2a', hp: 1350, dmg: 21, def: 10, spd: 95, xp: 520, arena: 'skyruins',
+    id: 'ancient_dragon', name: 'Древний Дракон', projColor: '#ff8a2a', hp: 1350, dmg: 17, def: 10, spd: 95, xp: 520, arena: 'skyruins',
     flies: true,
     phases: [
       { hpFrac: 1.0, spdMult: 1, dmgMult: 1, attacks: ['coneBreath', 'dashCharge'] },
@@ -66,7 +66,7 @@ PL.BOSS_DEFS = [
     ]
   },
   {
-    id: 'fallen_paladin', name: 'Падший Паладин', hp: 1080, dmg: 18, def: 11, spd: 92, xp: 500, arena: 'cathedral',
+    id: 'fallen_paladin', name: 'Падший Паладин', hp: 1080, dmg: 15, def: 11, spd: 92, xp: 500, arena: 'cathedral',
     phases: [
       { hpFrac: 1.0, spdMult: 1, dmgMult: 1, attacks: ['meleeSwing', 'dashCharge'] },
       { hpFrac: 0.6, spdMult: 1.05, dmgMult: 1.1, attacks: ['meleeSwing', 'dashCharge', 'groundSpikes'] },

@@ -72,7 +72,7 @@ PL.CLASSES = {
     id: 'archer', name: 'Лучник', weaponKind: 'bow',
     desc: 'Точная стрельба на дальней дистанции и ливень стрел.',
     palette: { skin: '#dcc19a', outfit: '#2e4a2e', outfitDark: '#1c2e1c', accent: '#8ddc6a', hair: '#5a3a1e', weapon: '#8a6a3a' },
-    base: { hp: 92, str: 13, def: 7, spd: 165, crit: 16, energyMax: 95, energyRegen: 11 },
+    base: { hp: 100, str: 13, def: 8, spd: 165, crit: 16, energyMax: 95, energyRegen: 11 },
     growth: { hp: 7, str: 1.3, def: 0.7, spd: 0.6, crit: 0.25 },
     light: { hits: 3, dmgMult: [0.85, 0.85, 1.05], range: 260, knockback: [30, 30, 50], startup: [0.1, 0.1, 0.12], active: 0.06, recovery: [0.16, 0.16, 0.24], projectile: true, projColor: '#e8dca0' },
     heavy: { dmgMult: 2.2, range: 300, knockback: 70, startup: 0.3, active: 0.08, recovery: 0.32, projectile: true, pierce: true, projColor: '#ffd76b' },

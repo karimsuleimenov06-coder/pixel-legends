@@ -17,7 +17,9 @@ PL.Hazards = (function () {
       if (h.timer <= 0) {
         h.timer = h.tickInterval;
         const dx = player.x - h.x;
-        if (Math.abs(dx) < h.radius / 2 + player.w / 2 && player.alive) {
+        // Spikes from one cast share a group: they erupt once and can wound the player only once in total.
+        if (Math.abs(dx) < h.radius / 2 + player.w / 2 && player.alive && !(h.group && h.group.hit)) {
+          if (h.group) h.group.hit = true;
           const final = PL.U.mitigate(h.dmg, player.def || 0);
           player.takeDamage(final, { knockback: 60, knockUp: -90, fromRight: dx < 0 });
           PL.Particles.hitNumber(player.x, player.y - player.h - 6, final, false);
@@ -47,22 +49,22 @@ PL.Hazards = (function () {
     }
   }
   function clear() { list = []; }
-  function spawnTelegraphed(x, radius, delay, dmg, duration, color) {
-    spawn({ x, radius, delay, dmg, duration, color, totalLife: delay + duration + 0.1 });
+  function spawnTelegraphed(x, radius, delay, dmg, duration, color, extra) {
+    spawn(Object.assign({ x, radius, delay, dmg, duration, color, totalLife: delay + duration + 0.1 }, extra || {}));
   }
-  return { spawn, spawnTelegraphed, update, render, clear };
+  return { spawn, spawnTelegraphed, update, render, clear, all: () => list };
 })();
 
 // ---------------- Shared boss attack pattern parameters ----------------
 PL.ATTACK_PATTERNS = {
-  meleeSwing: { telegraph: 0.35, active: 0.15, recovery: 0.55, range: 70, dmgMult: 1.0, knockback: 220, knockUp: -220 },
+  meleeSwing: { telegraph: 0.5, active: 0.15, recovery: 0.55, range: 70, dmgMult: 1.0, knockback: 220, knockUp: -220 },
   aoeSlam: { telegraph: 0.55, active: 0.18, recovery: 0.75, radius: 110, dmgMult: 1.4, knockback: 340, knockUp: -300, warning: true },
-  dashCharge: { telegraph: 0.42, active: 0.32, recovery: 0.6, range: 90, speed: 480, dmgMult: 1.2, knockback: 280, knockUp: -220, warning: true },
+  dashCharge: { telegraph: 0.55, active: 0.32, recovery: 0.6, range: 90, speed: 480, dmgMult: 0.95, knockback: 280, knockUp: -220, warning: true },
   groundSpikes: { telegraph: 0.75, active: 0.1, recovery: 0.5, count: 3, radius: 58, dmgMult: 1.25, warning: true },
   projectileBarrage: { telegraph: 0.3, active: 0.5, recovery: 0.5, count: 5, dmgMult: 0.5, speed: 280, knockback: 90, knockUp: -100 },
   summonAdds: { telegraph: 0.5, active: 0.1, recovery: 0.8, count: 2 },
   coneBreath: { telegraph: 0.5, active: 0.7, recovery: 0.6, range: 160, dmgMult: 0.3, ticks: 4, knockback: 50, knockUp: -60, warning: true },
-  cloneSwap: { telegraph: 0.3, active: 0.1, recovery: 0.4, dmgMult: 1.15, knockback: 240, knockUp: -220 },
+  cloneSwap: { telegraph: 0.45, active: 0.1, recovery: 0.4, dmgMult: 1.15, knockback: 240, knockUp: -220 },
   beamJudgment: { telegraph: 1.15, active: 0.15, recovery: 0.9, range: 999, dmgMult: 2.5, knockback: 320, knockUp: -260, warning: true, ultimate: true }
 };
 
@@ -119,8 +121,9 @@ PL.Enemy = class Enemy extends PL.Entity {
     return applied;
   }
 
-  // Bosses have poise: hits never cancel an attack in progress. Only a burst of player damage
-  // (12% of max HP within ~3s) staggers an idle boss briefly, at most once every 6 seconds.
+  // Bosses have poise: single hits never cancel an attack. A burst of player damage (8% of max HP
+  // within 4s) breaks poise: the boss is staggered and its attack is cancelled (except ultimates),
+  // at most once every 4 seconds. Allies never count toward it.
   takeBossDamage(amount, opts) {
     // Only a small shove from player hits (knockUp -1 keeps the boss on the ground); allies don't move it at all.
     const o = Object.assign({}, opts, { knockback: opts.fromAlly ? 0 : (opts.knockback || 0) * 0.2, knockUp: -1 });
@@ -128,12 +131,16 @@ PL.Enemy = class Enemy extends PL.Entity {
     if (!applied || !this.alive) return applied;
     const now = this.animTime;
     if (!opts.fromAlly) {
-      this.poiseLog = (this.poiseLog || []).filter(h => now - h.t < 3);
+      this.poiseLog = (this.poiseLog || []).filter(h => now - h.t < 4);
       this.poiseLog.push({ t: now, d: amount });
       const burst = this.poiseLog.reduce((a, h) => a + h.d, 0);
-      if (burst >= this.maxHp * 0.12 && !this.action && now - (this.lastStagger || -99) > 6) {
+      const ultimate = this.action && this.action.pattern && this.action.pattern.ultimate;
+      if (burst >= this.maxHp * 0.08 && !ultimate && now - (this.lastStagger || -99) > 4) {
         this.lastStagger = now; this.poiseLog = [];
-        this.hurtTimer = 0.5;
+        this.action = null;
+        this.hurtTimer = 0.8;
+        this.vx = (opts.fromRight ? -1 : 1) * 90;
+        PL.World.camera.shake(5, 0.15);
         PL.Particles.spawnFloatText(this.x, this.y - this.h - 10, 'ОШЕЛОМЛЁН', '#ffd04a', true);
       }
     }
@@ -473,6 +480,7 @@ PL.Boss = class Boss extends PL.Enemy {
     this.lastAttackId = id;
     this.atkCooldowns[id] = pattern.ultimate ? PL.U.rand(9, 11) : PL.U.rand(3.5, 6);
     this.action = { kind: id, pattern, phase: 'telegraph', t: 0, hasHit: false, tickCount: 0 };
+    this.decisionTimer = PL.U.rand(0.7, 1.3); // breathing room after each attack: a window to strike back
     if (this.onAttackStart) this.onAttackStart(id, pattern);
   }
 
@@ -483,9 +491,10 @@ PL.Boss = class Boss extends PL.Enemy {
       this.vx = PL.U.approach(this.vx, 0, this.spd * 8 * dt);
       if (a.kind === 'groundSpikes' && a.t > 0.05 && !a.spikesPlaced) {
         a.spikesPlaced = true;
+        const group = { hit: false };
         for (let i = 0; i < a.pattern.count; i++) {
           const ox = player.x + PL.U.rand(-70, 70);
-          PL.Hazards.spawnTelegraphed(ox, a.pattern.radius, a.pattern.telegraph * 0.8, this.dmg * a.pattern.dmgMult, 1.0, '#ff5a1a');
+          PL.Hazards.spawnTelegraphed(ox, a.pattern.radius, a.pattern.telegraph * 0.8, this.dmg * a.pattern.dmgMult, 1.0, '#ff5a1a', { group, tickInterval: 99 });
         }
       }
       if (a.t >= a.pattern.telegraph) { a.phase = 'active'; a.t = 0; }
@@ -577,7 +586,8 @@ PL.Boss = class Boss extends PL.Enemy {
         for (let i = 0; i < p.count; i++) {
           const spawnDef = PL.U.choose(PL.ENEMY_DEFS.slice(0, 5));
           const ex = PL.U.clamp(this.x + PL.U.rand(-80, 80), 40, PL.World.width - 40);
-          const e = PL.createEnemy(spawnDef, ex);
+          const e = PL.createEnemy(spawnDef, ex, { hp: 0.6, dmg: 0.7 }); // weaker minions than regular foes
+          e.xp = Math.round(e.xp * 0.5);
           this._enemiesList.push(e);
         }
         PL.Particles.spawnBurst(this.x, this.y - this.h * 0.5, '#ffd76b', 14, 150);
