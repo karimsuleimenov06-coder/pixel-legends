@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pixel Legends</title>
+<meta name="theme-color" content="#06081a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pixel Legends">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- ===================== MAIN MENU ===================== -->
+  <div id="screen-menu" class="screen">
+    <div class="title-wrap">
+      <h1 class="game-title">PIXEL <span>LEGENDS</span></h1>
+      <p class="game-subtitle">Эпичные пиксельные битвы</p>
+    </div>
+    <div class="menu-buttons">
+      <button class="btn btn-primary" data-action="go-class-select">Начать игру</button>
+      <button class="btn" data-action="go-stats">Статистика</button>
+      <button class="btn" data-action="fullscreen" id="btn-fullscreen">На весь экран</button>
+      <div class="fs-hint hidden" id="fs-hint">На iPhone: «Поделиться» → «На экран Домой», затем запускай игру с иконки — она откроется на весь экран.</div>
+      <button class="btn" data-action="wipe-save">Сбросить прогресс</button>
+    </div>
+    <div class="version-tag">v1.0</div>
+  </div>
+
+  <!-- ===================== CLASS SELECT ===================== -->
+  <div id="screen-class" class="screen hidden">
+    <h2 class="screen-title">Выбери класс</h2>
+    <div id="class-cards" class="class-cards"></div>
+    <div class="screen-footer">
+      <button class="btn" data-action="go-menu">Назад</button>
+      <button class="btn btn-primary" id="btn-confirm-class" disabled data-action="go-mode-select">Далее</button>
+    </div>
+  </div>
+
+  <!-- ===================== MODE SELECT ===================== -->
+  <div id="screen-mode" class="screen hidden">
+    <h2 class="screen-title">Выбери режим</h2>
+    <div id="mode-cards" class="mode-cards"></div>
+    <div class="screen-footer">
+      <button class="btn" data-action="go-class-select">Назад</button>
+      <button class="btn" data-action="go-skilltree">Прокачка персонажа</button>
+    </div>
+  </div>
+
+  <!-- ===================== ENEMY/SUBMODE PICKER ===================== -->
+  <div id="screen-submode" class="screen hidden">
+    <h2 class="screen-title" id="submode-title">Выбери противника</h2>
+    <div id="submode-cards" class="submode-cards"></div>
+    <div class="screen-footer">
+      <button class="btn" data-action="go-mode-select">Назад</button>
+    </div>
+  </div>
+
+  <!-- ===================== SKILL TREE / CHARACTER SCREEN ===================== -->
+  <div id="screen-skilltree" class="screen hidden">
+    <h2 class="screen-title">Прокачка персонажа</h2>
+    <div class="char-panel">
+      <div class="char-stats">
+        <div class="stat-line"><span>Уровень</span><b id="st-level">1</b></div>
+        <div class="stat-line"><span>Опыт</span><b id="st-xp">0/0</b></div>
+        <div class="xp-bar-outer"><div class="xp-bar-inner" id="st-xp-bar"></div></div>
+        <div class="stat-line"><span>Очки характеристик</span><b id="st-points">0</b></div>
+        <div class="attr-row" data-attr="str"><span>Сила (урон)</span><b id="attr-str">0</b><button class="btn-mini" data-attr-add="str">+</button></div>
+        <div class="attr-row" data-attr="vit"><span>Здоровье</span><b id="attr-vit">0</b><button class="btn-mini" data-attr-add="vit">+</button></div>
+        <div class="attr-row" data-attr="def"><span>Защита</span><b id="attr-def">0</b><button class="btn-mini" data-attr-add="def">+</button></div>
+        <div class="attr-row" data-attr="spd"><span>Скорость</span><b id="attr-spd">0</b><button class="btn-mini" data-attr-add="spd">+</button></div>
+        <div class="attr-row" data-attr="crit"><span>Крит. шанс</span><b id="attr-crit">0</b><button class="btn-mini" data-attr-add="crit">+</button></div>
+      </div>
+      <div class="skill-panel">
+        <div class="skill-points-row">Очки навыков: <b id="skill-points">0</b></div>
+        <div id="skill-tree-grid" class="skill-tree-grid"></div>
+      </div>
+    </div>
+    <div class="screen-footer">
+      <button class="btn btn-primary" data-action="go-back-from-skilltree">Назад</button>
+    </div>
+  </div>
+
+  <!-- ===================== STATS SCREEN ===================== -->
+  <div id="screen-stats" class="screen hidden">
+    <h2 class="screen-title">Статистика боёв</h2>
+    <div id="stats-body" class="stats-body"></div>
+    <div class="screen-footer">
+      <button class="btn btn-primary" data-action="go-menu">Назад</button>
+    </div>
+  </div>
+
+  <!-- ===================== HUD (during gameplay) ===================== -->
+  <div id="hud" class="hidden">
+    <div class="hud-top-left">
+      <div class="portrait" id="hud-portrait"></div>
+      <div class="bars">
+        <div class="bar-label"><span id="hud-level">Ур. 1</span></div>
+        <div class="bar hp-bar"><div class="bar-fill" id="hud-hp-fill"></div><div class="bar-text" id="hud-hp-text"></div></div>
+        <div class="bar nrg-bar"><div class="bar-fill" id="hud-nrg-fill"></div></div>
+      </div>
+    </div>
+    <div class="hud-top-right" id="hud-mode-info"></div>
+
+    <div class="boss-bar-wrap hidden" id="boss-bar-wrap">
+      <div class="boss-name" id="boss-name">???</div>
+      <div class="bar boss-bar"><div class="bar-fill" id="boss-hp-fill"></div></div>
+      <div class="boss-phase" id="boss-phase"></div>
+    </div>
+
+    <div class="combo-counter hidden" id="combo-counter"></div>
+
+    <div class="ability-bar">
+      <div class="ability-slot" id="ability-slot-q"><span class="ability-key">Q</span><div class="cooldown-mask"></div></div>
+      <div class="ability-slot" id="ability-slot-e"><span class="ability-key">E</span><div class="cooldown-mask"></div></div>
+    </div>
+
+    <button class="btn-pause" data-action="pause-game">II</button>
+  </div>
+
+  <!-- ===================== MOBILE CONTROLS ===================== -->
+  <div id="mobile-controls" class="hidden">
+    <div id="joystick-zone">
+      <div id="joystick-base"><div id="joystick-knob"></div></div>
+    </div>
+    <div id="action-hit"></div>
+    <div class="tbtn tbtn-main" data-btn="light"><div class="cd"></div></div>
+    <div class="tbtn" data-btn="heavy"><div class="cd"></div></div>
+    <div class="tbtn" data-btn="jump"><div class="cd"></div></div>
+    <div class="tbtn" data-btn="dodge"><div class="cd"></div></div>
+    <div class="tbtn" data-btn="q"><span class="tkey">Q</span><div class="cd"></div></div>
+    <div class="tbtn" data-btn="e"><span class="tkey">E</span><div class="cd"></div></div>
+  </div>
+
+  <!-- ===================== PAUSE OVERLAY ===================== -->
+  <div id="screen-pause" class="screen overlay hidden">
+    <h2 class="screen-title">Пауза</h2>
+    <div class="menu-buttons">
+      <button class="btn btn-primary" data-action="resume-game">Продолжить</button>
+      <button class="btn" data-action="quit-to-menu">Выйти в меню</button>
+    </div>
+  </div>
+
+  <!-- ===================== VICTORY ===================== -->
+  <div id="screen-victory" class="screen overlay hidden">
+    <h2 class="screen-title victory-title">ПОБЕДА!</h2>
+    <div id="victory-body" class="result-body"></div>
+    <div class="menu-buttons">
+      <button class="btn btn-primary" data-action="victory-continue">Продолжить</button>
+      <button class="btn" data-action="quit-to-menu">В меню</button>
+    </div>
+  </div>
+
+  <!-- ===================== DEFEAT ===================== -->
+  <div id="screen-defeat" class="screen overlay hidden">
+    <h2 class="screen-title defeat-title">ПОРАЖЕНИЕ</h2>
+    <div id="defeat-body" class="result-body"></div>
+    <div class="menu-buttons">
+      <button class="btn btn-primary" data-action="retry-run">Повторить</button>
+      <button class="btn" data-action="quit-to-menu">В меню</button>
+    </div>
+  </div>
+
+  <div id="level-up-toast" class="hidden">УРОВЕНЬ ПОВЫШЕН!</div>
+  <div id="boss-warning" class="hidden"></div>
+
+  <div id="rotate-prompt" class="hidden">
+    <div class="rotate-icon">⟲</div>
+    <div class="rotate-text">Поверните устройство горизонтально</div>
+  </div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/pixel.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/entity.js"></script>
+<script src="js/charsprites.js"></script>
+<script src="js/spritedata.js"></script>
+<script src="js/tiles.js"></script>
+<script src="js/lighting.js"></script>
+<script src="js/classes.js"></script>
+<script src="js/player.js"></script>
+<script src="js/data.js"></script>
+<script src="js/enemy.js"></script>
+<script src="js/projectile.js"></script>
+<script src="js/world.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/save.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

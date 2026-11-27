@@ -1,0 +1,16 @@
+{
+  "name": "Pixel Legends",
+  "short_name": "Pixel Legends",
+  "description": "Пиксельная Action RPG: эпичные битвы, 4 класса, 5 режимов, боссы.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#06081a",
+  "theme_color": "#06081a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
