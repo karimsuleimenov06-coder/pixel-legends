@@ -56,6 +56,9 @@ PL.Player = class Player extends PL.Entity {
     this.slowMult = 1;
     this.slowTimer = 0;
     this.lungeTimer = 0;   // dash-strike heavy attack movement
+    this.lightCd = 0;      // pause after a full light combo (no endless chains)
+    this.heavyCd = 0;      // heavy attack recharge
+    this.lightCdMax = 1; this.heavyCdMax = 1;
     this.empowerTimer = 0; // Necromancer's Dark Pact: double damage for the player and summoned allies
     this.regenTimer = 0; this.regenRate = 0; this.regenAcc = 0; // Cleric's Healing Light heal-over-time
     this.guardTimer = 0; this.guardReduction = 0;                // Guardian's Shield Wall
@@ -78,6 +81,8 @@ PL.Player = class Player extends PL.Entity {
     if (this.cooldowns.q > 0) this.cooldowns.q = Math.max(0, this.cooldowns.q - dt);
     if (this.cooldowns.e > 0) this.cooldowns.e = Math.max(0, this.cooldowns.e - dt);
     if (this.dodgeCooldown > 0) this.dodgeCooldown -= dt;
+    if (this.lightCd > 0) this.lightCd = Math.max(0, this.lightCd - dt);
+    if (this.heavyCd > 0) this.heavyCd = Math.max(0, this.heavyCd - dt);
     if (this.comboResetTimer > 0) { this.comboResetTimer -= dt; if (this.comboResetTimer <= 0) this.comboIndex = 0; }
     if (this.comboDisplay.timer > 0) { this.comboDisplay.timer -= dt; if (this.comboDisplay.timer <= 0) this.comboDisplay.count = 0; }
     if (this.slowTimer > 0) { this.slowTimer -= dt; if (this.slowTimer <= 0) this.slowMult = 1; }
@@ -198,17 +203,27 @@ PL.Player = class Player extends PL.Entity {
 
   startAction(type) {
     this.queuedAction = null;
+    // Attacks on cooldown are simply not started (the press is dropped, not queued).
+    if (type === 'light' && this.lightCd > 0) return;
+    if (type === 'heavy' && this.heavyCd > 0) return;
     this.faceNearestEnemy();
     if (type === 'light') {
       const def = this.classDef.light;
       const idx = this.comboIndex % def.hits;
       this.action = { type: 'light', idx, startup: def.startup[idx], active: def.active, recovery: def.recovery[idx], t: 0, phase: 'startup', locked: true, hasHit: false, def };
+      if (idx === def.hits - 1) {
+        // Finishing blow of the combo: short breather before the next combo can start.
+        this.lightCdMax = def.startup[idx] + def.active + def.recovery[idx] + (def.comboCooldown || 0.55);
+        this.lightCd = this.lightCdMax;
+      }
       this.comboIndex++;
       this.comboResetTimer = 0.9;
     } else if (type === 'heavy') {
       const def = this.classDef.heavy;
       this.action = { type: 'heavy', startup: def.startup, active: def.active, recovery: def.recovery, t: 0, phase: 'startup', locked: true, hasHit: false, def };
       this.comboIndex = 0;
+      this.heavyCdMax = def.startup + def.active + def.recovery + (def.cooldown || 1.2);
+      this.heavyCd = this.heavyCdMax;
       if (def.dashStrike) { this.lungeTimer = def.startup; PL.Audio.sfx.dash(); }
     }
   }

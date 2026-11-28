@@ -330,6 +330,8 @@ PL.UI = (function () {
       tb.classList.toggle('noenergy', p.energy < ab.energyCost);
     }
     touchBtn('dodge').querySelector('.cd').style.height = (PL.U.clamp(p.dodgeCooldown / 0.85, 0, 1) * 100) + '%';
+    touchBtn('light').querySelector('.cd').style.height = (PL.U.clamp(p.lightCd / p.lightCdMax, 0, 1) * 100) + '%';
+    touchBtn('heavy').querySelector('.cd').style.height = (PL.U.clamp(p.heavyCd / p.heavyCdMax, 0, 1) * 100) + '%';
 
     const boss = game.enemies.find(e => e.isBoss && e.alive);
     const wrap = el('boss-bar-wrap');

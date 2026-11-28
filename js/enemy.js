@@ -114,7 +114,10 @@ PL.Enemy = class Enemy extends PL.Entity {
     const tough = this.isElite && opts.fromAlly;
     if (tough) opts = Object.assign({}, opts, { knockback: 0 });
     const applied = super.takeDamage(amount, opts);
-    if (applied && this.alive && !tough) {
+    // A hit interrupts only if the enemy wasn't interrupted moments ago, so spamming can't stun-lock it.
+    const immune = this.animTime - (this.lastInterrupt == null ? -99 : this.lastInterrupt) < (this.isElite ? 1.6 : 0.7);
+    if (applied && this.alive && !tough && !immune) {
+      this.lastInterrupt = this.animTime;
       this.hurtTimer = 0.18;
       if (this.action && !this.action.lockedThroughHurt) this.action = null;
     }
@@ -122,8 +125,8 @@ PL.Enemy = class Enemy extends PL.Entity {
   }
 
   // Bosses have poise: single hits never cancel an attack. A burst of player damage (8% of max HP
-  // within 4s) breaks poise: the boss is staggered and its attack is cancelled (except ultimates),
-  // at most once every 4 seconds. Allies never count toward it.
+  // within 4s) breaks poise: the boss is staggered (and a wind-up in progress is cancelled, except
+  // ultimates), at most once every 4 seconds. Swings already in motion still land. Allies never count.
   takeBossDamage(amount, opts) {
     // Only a small shove from player hits (knockUp -1 keeps the boss on the ground); allies don't move it at all.
     const o = Object.assign({}, opts, { knockback: opts.fromAlly ? 0 : (opts.knockback || 0) * 0.2, knockUp: -1 });
@@ -135,7 +138,8 @@ PL.Enemy = class Enemy extends PL.Entity {
       this.poiseLog.push({ t: now, d: amount });
       const burst = this.poiseLog.reduce((a, h) => a + h.d, 0);
       const ultimate = this.action && this.action.pattern && this.action.pattern.ultimate;
-      if (burst >= this.maxHp * 0.08 && !ultimate && now - (this.lastStagger || -99) > 4) {
+      const committed = this.action && this.action.phase !== 'telegraph'; // swings already in motion land anyway
+      if (burst >= this.maxHp * 0.08 && !ultimate && !committed && now - (this.lastStagger || -99) > 4) {
         this.lastStagger = now; this.poiseLog = [];
         this.action = null;
         this.hurtTimer = 0.8;
